@@ -16,6 +16,7 @@ Imports:
     Rcpp,
     glmnet,
     ncvreg
+URL: https://kbose28.github.io/FarmSelect/
 RoxygenNote: 6.0.1
 LinkingTo: Rcpp, RcppArmadillo
 NeedsCompilation: yes
