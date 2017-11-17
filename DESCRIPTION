@@ -1,0 +1,24 @@
+Package: FarmSelect
+Title: Factor Adjusted Robust Model Selection
+Version: 1.0.0
+Authors@R: c(person("Koushiki", "Bose", email = "bose@princeton.edu", role = c("aut", "cre")), person("Yuan", "Ke", email = "keyuan_princeton@163.com", role = "aut"),person("Kaizheng", "Wang", email = "kzwang2015@gmail.com", role = "aut"))
+Description: Performs robust model selection after adjusting for latent factors in the covariates.   See the paper on the 'FarmSelect' method, <link>, for detailed description of methods and further references. 
+Depends: R (>= 3.3.0)
+License: GPL-2
+Encoding: UTF-8
+LazyData: true
+Imports:
+    graphics,
+    stats,
+    grDevices,
+    utils, 
+    methods,
+    Rcpp,
+    glmnet,
+    ncvreg
+RoxygenNote: 6.0.1
+LinkingTo: Rcpp, RcppArmadillo
+NeedsCompilation: yes
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
