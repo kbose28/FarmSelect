@@ -1,0 +1,118 @@
+---
+output: github_document
+
+references:
+- id: ah2013
+  title: 'Eigenvalue Ratio Test for the Number of Factors.'
+  author:
+  - family: Horenstein
+     given: AR
+  publisher: Econometrica
+  volume: 81
+  issue: 3
+  page: 1203–1227
+  issued:
+    year: 2013
+---
+
+
+
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+
+#FarmSelect: Factor Adjusted Robust Model Selection
+
+##Goal of the package
+This R package implements a consistent model selection strategy for high dimensional sparse regression when the covariate dependence can be reduced through factor models. By separating the latent factors from idiosyncratic components, the problem is transformed from model selection with highly correlated covariates to that with weakly correlated variables. It is appropriate for cases where we have many variables compared to the number of samples. Moreover, it implements a robust procedure to estimate distribution parameters wherever possible, hence being suitable for cases when the underlying distribution deviates from Gaussianity, which is commonly assumed in the literature. See the paper on this method, Fan et al.(2017)<https://arxiv.org/pdf/1612.08490.pdf>, for detailed description of methods and further references. 
+
+Let there be $n$ covariates and $p$ samples. Let $x_{ij}$ be the $i$th observation of the $j$th covariate, and assume the approximate factor model: ![equation](https://latex.codecogs.com/gif.latex?\mathbf{x}_i&space;=&space;\mathbf{Bf}_i&space;&plus;\mathbf{u}_i), where $\bf{f}_i$ are the $K$ underlying factors, $B$ are the factor loadings, $u$ are the errors. We assume the data is of dimension $p$ and the sample size is $n$, leading to $p$ hypothesis tests. 
+
+## Installation
+
+You can install FarmTest from github with:
+
+```{r gh-installation, eval = FALSE}
+install.packages("devtools")
+devtools::install_github("kbose28/FarmSelect")
+library(FarmSelect)
+```
+
+##Getting help
+
+Help on the functions can be accessed by typing "?", followed by function name at the R command prompt. 
+
+##Issues
+
+* Error: "...could not find build tools necessary to build FarmSelect": Since `FarmSelect` relies on `C++` code, command line tools need to be installed to compile the code. For Windows you need Rtools, for Mac OS X you need to install Command Line Tools for XCode. See (https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites). 
+
+* Error: "library not found for -lgfortran/-lquadmath": It means your gfortran binaries are out of date. This is a common environment specific issue. 
+
+    1. In R 3.0.0 - R 3.3.0: Upgrading to R 3.4 is strongly recommended. Then go to the next step. Alternatively, you can try the instructions here: http://thecoatlessprofessor.com/programming/rcpp-rcpparmadillo-and-os-x-mavericks-lgfortran-and-lquadmath-error/. 
+
+    2. For >= R 3.4.* : download the installer from the here: https://gcc.gnu.org/wiki/GFortranBinaries#MacOS. Now simply run the installer. (If installer is not available for your version of OS, use the latest one.)
+
+* Error: "... .rdb': No such file or directory" Try devtools::install_github("kbose28/FarmSelect", dependencies=TRUE)
+
+* Error in RStudio even after installing XCode: "Could not find tools necessary to build FarmSelect": This is a known bug in RStudio. Try options(buildtools.check=function(action) TRUE) in RStudio to prevent RStudio from validating build tools.
+
+
+##Functions
+
+There are three functions available. 
+
+* `farm.select`: The main function farm.test which carries out the entire model testing procedure.
+* `farm.adjust`: Adjusts the data for latent fators.
+
+## Simple hypothesis testing example 
+
+Here we generate data from a factor model with 3 factors. We have 50 samples of 100 dimensional data. The model is of size 5, where the first 5 covariates model coefficients being non-zero and the rest zero. The factors, loadings, erros are all generated from a normal distribution.
+
+```{r}
+ set.seed(100)
+ P = 100 #dimension
+N = 50 #samples
+ K = 3 #nfactors
+ Q = 5 #model size
+ Lambda=matrix(rnorm(P*K, 0,1), P,K)
+ F=matrix(rnorm(N*K, 0,1), N,K)
+ UU=matrix(rnorm(P*N, 0,1), P,N)
+ X=Lambda%*%t(F)+UU
+ beta_1=3+3*runif(Q)
+ beta = c(beta_1, rep(0,P-Q))
+ eps=rnorm(N)
+ Y=t(X)%*%beta+eps
+ output = farm.select(Y,X)
+```
+Now we use a different loss function for thr model selection step. 
+```{r}
+output = farm.select(Y,X, loss = "scad" )
+```
+
+##Other functions
+
+The function ``farm.adjust`` adjusts the dataset for latent factors. The number of factors is estimated internally by using the method in [@ah2013].
+```{r}
+output = farm.adjust(Y,X)
+names(output)
+```
+If known, we can provide this function (or the main function) the number of latent factors. Providing too large a number results in a warning message. The maximum number of factors possible is $\max(n,p)$ but a much smaller number is recommended. 
+```{r}
+output = farm.adjust(Y,X, K.factors  = 30)
+names(output)
+```
+We see a warning telling us that it is not a good idea to calculate 30 eigenvalues from a dataset that has only 50 samples. 
+
+
+## Notes 
+
+1. Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
+

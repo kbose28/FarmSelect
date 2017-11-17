@@ -9,7 +9,7 @@ farm.select(Y, X, loss = c("lasso", "scad", "mcp"), verbose = TRUE, ...)
 \arguments{
 \item{Y}{a n x 1 outcome vector.}
 
-\item{X}{a n x p covariate matrix with each row being a sample. Must have same number of rows as \code{Y}.}
+\item{X}{a p x n covariate matrix with each row being a sample. Must have same number of columns as the size of \code{Y}.}
 
 \item{loss}{an \emph{optional} character string specifying the loss function to be minimized. Must be one of "lasso" (default), "scad" or "mcp". You can just specify the initial letter.}
 
@@ -20,6 +20,8 @@ farm.select(Y, X, loss = c("lasso", "scad", "mcp"), verbose = TRUE, ...)
 \value{
 A list with the following items
 \item{beta.chosen}{the indices of the covariates chosen in the model}
+\item{coef.chosen}{the coefficients of the chosen coavriates}
+\item{nfactors}{number of (estimated) factors}
 }
 \description{
 Given a covariate matrix and output vector, this function first adjusts the covariates for underlying factors and then performs model selection.
@@ -27,8 +29,24 @@ Given a covariate matrix and output vector, this function first adjusts the cova
 \details{
 Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
 
-For details about factor adjustment, see !!! Kaizheng's paper !!
+For details about the method, see Fan et al.(2017).
 }
 \examples{
-
+set.seed(100)
+P = 100 #dimension
+N = 50 #samples
+K = 3 #nfactors
+Q = 5 #model size
+Lambda=matrix(rnorm(P*K, 0,1), P,K)
+F=matrix(rnorm(N*K, 0,1), N,K)
+UU=matrix(rnorm(P*N, 0,1), P,N)
+X=Lambda\%*\%t(F)+UU
+beta_1=3+3*runif(Q)
+beta = c(beta_1, rep(0,P-Q))
+eps=rnorm(N)
+Y=t(X)\%*\%beta+eps
+output = farm.select(Y,X)
+}
+\references{
+Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/pdf/1612.08490.pdf}
 }

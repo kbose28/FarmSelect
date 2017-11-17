@@ -4,34 +4,47 @@
 \alias{farm.adjust}
 \title{Adjusting a data matrix for underlying factors}
 \usage{
-farm.adjust(X, Y, factors = NULL, K.factors = NULL, robust.cov = FALSE)
+farm.adjust(Y, X, K.factors = NULL)
 }
 \arguments{
-\item{X}{a n x p data matrix with each row being a sample.}
-
 \item{Y}{a n x 1 outcome vector.}
 
-\item{factors}{an \emph{optional} factor matrix with each column being a factor for \code{X}. Same number of rows as \code{X}.}
+\item{X}{a n x p data matrix with each row being a sample.}
 
 \item{K.factors}{a \emph{optional} number of factors to be estimated. Otherwise estimated internally.}
-
-\item{robust.cov}{an \emph{optional} boolean, specifying whether or not to use a robust covariance matrix for factor adjustment. Default is FALSE.}
 }
 \value{
 A list with the following items
 \item{residual}{the data after being adjusted for underlying factors}
 \item{loadings}{estimated factor loadings}
 \item{factors}{estimated factors}
-\item{nfactors}{if needed, the number of estimated factors}
+\item{nfactors}{the number of (estimated) factors}
 }
 \description{
 Given a matrix of covariates, this function estimates the underlying factors and computes data residuals after regressing out those factors.
 }
 \details{
-Using \code{robust.cov = TRUE} uses the Huber's loss to estimate the covariance matrix. For details of covariance estimation method see Zhou et al.(2017).
-
 Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
+
+Number of latent factors, if not provided, is estimated by the eignevalue ratio test. See Ahn and Horenstein(2013).
+}
+\examples{
+set.seed(100)
+P = 100 #dimension
+N = 50 #samples
+K = 3 #nfactors
+Q = 5 #model size
+Lambda=matrix(rnorm(P*K, 0,1), P,K)
+F=matrix(rnorm(N*K, 0,1), N,K)
+UU=matrix(rnorm(P*N, 0,1), P,N)
+X=Lambda\%*\%t(F)+UU
+beta_1=3+3*runif(Q)
+beta = c(beta_1, rep(0,P-Q))
+eps=0.1*rnorm(N)
+Y=t(X)\%*\%beta+eps
+output = farm.adjust(X,Y)
+
 }
 \references{
-Zhou W.-X., Fan J., Ke Y., Sun Q., "FARM-Test: Factor-adjusted robust multiple testing with false discovery control." \url{https://goo.gl/68SJpd}
+Ahn, S. C., and A. R. Horenstein (2013): "Eigenvalue Ratio Test for the Number of Factors," Econometrica, 81 (3), 1203–1227.
 }
