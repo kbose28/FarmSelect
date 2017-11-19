@@ -4,14 +4,14 @@
 \alias{farm.select}
 \title{Factor-adjusted robust model selection}
 \usage{
-farm.select(Y, X, loss = c("lasso", "scad", "mcp"), verbose = TRUE, ...)
+farm.select(Y, X, loss = c("mcp", "scad", "lasso"), verbose = TRUE, ...)
 }
 \arguments{
 \item{Y}{a n x 1 outcome vector.}
 
 \item{X}{a p x n covariate matrix with each row being a sample. Must have same number of columns as the size of \code{Y}.}
 
-\item{loss}{an \emph{optional} character string specifying the loss function to be minimized. Must be one of "lasso" (default), "scad" or "mcp". You can just specify the initial letter.}
+\item{loss}{an \emph{optional} character string specifying the loss function to be minimized. Must be one of "mcp" (default), "scad" or "lasso". You can just specify the initial letter.}
 
 \item{verbose}{an \emph{optional} logical determining whether or not to print output to the console. Default is TRUE.}
 
@@ -20,16 +20,20 @@ farm.select(Y, X, loss = c("lasso", "scad", "mcp"), verbose = TRUE, ...)
 \value{
 A list with the following items
 \item{beta.chosen}{the indices of the covariates chosen in the model}
-\item{coef.chosen}{the coefficients of the chosen coavriates}
+\item{coef.chosen}{the coefficients of the chosen covariates}
+\item{X.res}{the decorrelated covariate matrix}
+\item{Y.res}{the decorrelated response vector}
 \item{nfactors}{number of (estimated) factors}
 }
 \description{
 Given a covariate matrix and output vector, this function first adjusts the covariates for underlying factors and then performs model selection.
 }
 \details{
-Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
+Number of rows and columns of the covariate matrix must be at least 4 in order to be able to calculate latent factors.
 
 For details about the method, see Fan et al.(2017).
+
+For formula of how the covariates and the repsonse vector are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
 }
 \examples{
 set.seed(100)

@@ -19,11 +19,17 @@ A list with the following items
 \item{loadings}{estimated factor loadings}
 \item{factors}{estimated factors}
 \item{nfactors}{the number of (estimated) factors}
+\item{X.res}{the decorrelated covariate matrix}
+\item{Y.res}{the decorrelated response vector}
 }
 \description{
 Given a matrix of covariates, this function estimates the underlying factors and computes data residuals after regressing out those factors.
 }
 \details{
+For details about the method, see Fan et al.(2017).
+
+For formula of how the covariates and the repsonse vector are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
+
 Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
 
 Number of latent factors, if not provided, is estimated by the eignevalue ratio test. See Ahn and Horenstein(2013).
@@ -42,9 +48,11 @@ beta_1=3+3*runif(Q)
 beta = c(beta_1, rep(0,P-Q))
 eps=0.1*rnorm(N)
 Y=t(X)\%*\%beta+eps
-output = farm.adjust(X,Y)
+output = farm.adjust(Y,X)
 
 }
 \references{
 Ahn, S. C., and A. R. Horenstein (2013): "Eigenvalue Ratio Test for the Number of Factors," Econometrica, 81 (3), 1203–1227.
+
+Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/pdf/1612.08490.pdf}
 }

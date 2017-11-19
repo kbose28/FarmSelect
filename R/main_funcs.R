@@ -14,20 +14,20 @@ NULL
 #' Factor-adjusted robust model selection
 #'
 #' Given a covariate matrix and output vector, this function first adjusts the covariates for underlying factors and then performs model selection.
-#' @param Y a n x 1 outcome vector.
+#' @param Y a size n outcome vector.
 #' @param X a p x n covariate matrix with each row being a sample. Must have same number of columns as the size of \code{Y}.
-#' @param loss an \emph{optional} character string specifying the loss function to be minimized. Must be one of "lasso" (default), "scad" or "mcp". You can just specify the initial letter.
+#' @param loss an \emph{optional} character string specifying the loss function to be minimized. Must be one of "mcp" (default), "scad" or "lasso". You can just specify the initial letter.
 #' @param verbose an \emph{optional} logical determining whether or not to print output to the console. Default is TRUE.
 #' @param \dots Arguments passed to the \code{\link{farm.adjust}} function.
 #' @return A list with the following items
 #' \item{beta.chosen}{the indices of the covariates chosen in the model}
-#' \item{coef.chosen}{the coefficients of the chosen coavriates}
+#' \item{coef.chosen}{the coefficients of the chosen covariates}
+#' \item{X.res}{the decorrelated covariate matrix}
+#' \item{Y.res}{the decorrelated response vector}
 #' \item{nfactors}{number of (estimated) factors}
-#' @details
-# #' @details
-#' Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
+#' @details Number of rows and columns of the covariate matrix must be at least 4 in order to be able to calculate latent factors.
 #' @details For details about the method, see Fan et al.(2017).
-#'
+#' @details For formula of how the covariates and the repsonse vector are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
 #' @examples
 #' set.seed(100)
 #' P = 100 #dimension
@@ -45,10 +45,10 @@ NULL
 #' output = farm.select(Y,X)
 #' @references Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/pdf/1612.08490.pdf}
 #' @export
-farm.select <- function (Y, X,  loss=c("lasso", "scad", "mcp"), verbose = TRUE, ...){
+farm.select <- function (Y, X,  loss=c("mcp", "scad", "lasso"), verbose = TRUE, ...){
   #error checking
   if(NCOL(X)!=NROW(Y)) stop('number of rows in covariate matrix should be size of the outcome vector')
-    output.final = farm.select.adjusted(Y, X,   loss=c("lasso", "scad", "mcp"), ...)
+    output.final = farm.select.adjusted(Y, X,   loss=c("mcp", "scad", "lasso"), ...)
     if(verbose){output.final.call = match.call()
     cat("Call:\n")
     print(output.final.call)
@@ -56,32 +56,33 @@ farm.select <- function (Y, X,  loss=c("lasso", "scad", "mcp"), verbose = TRUE, 
     cat(paste("loss function used: ",  match.arg(loss), "\n",sep = ""))
     cat(paste("\np = ", NROW(X),", n = ", NCOL(X),"\n", sep = ""))
     cat("size of model selected:\n")
-    if(is.character(output.final$beta.chosen)){ cat(" no variable selected\n")} else{ cat(paste(" ", NROW(output$beta.chosen),"\n", sep = ""))}
+    if(is.character(output.final$beta.chosen)){ cat(" no variable selected\n")} else{ cat(paste(" ", NROW(output.final$beta.chosen),"\n", sep = ""))}
   }
-  return(output)
+  return(output.final)
 }
 
 ###################################################################################
 ## main function
 ###################################################################################
-farm.select.adjusted <- function (Y, X,   loss=c("lasso", "scad", "mcp"), ...){
+farm.select.adjusted <- function (Y, X,   loss=c("mcp", "scad", "lasso"), ...){
   X = sweep(X, 1, apply(X, 1, mean))
+  Y  = Y-mean(Y)
   #adjust for factors
-  output.adjust  = farm.adjust(X, Y,...)
+  output.adjust  = farm.adjust(Y, X,...)
 
   #find residuals from factor adjustment
-  U = output.adjust$X.res
-  Y_star = output.adjust$Y.res
+  X.res = output.adjust$X.res
+  Y.res = output.adjust$Y.res
   nfactors = output.adjust$nfactors
-  nx = NROW(U)
-  p = NCOL(U)
+  nx = NROW(X.res)
+  p = NCOL(X.res)
   loss <- match.arg(loss)
 
   #perform model selection
-  output.chosen = farm.select.temp (X, Y, U, Y_star, loss)
+  output.chosen = farm.select.temp (Y, X, X.res, Y.res, loss)
 
   #list all the output
-  list(beta.chosen = output.chosen$beta_chosen, coef.chosen = output.chosen$coef_chosen, nfactors = nfactors)
+  list(beta.chosen = output.chosen$beta_chosen, coef.chosen = output.chosen$coef_chosen, nfactors = nfactors, X.res = X.res, Y.res = Y.res)
 }
 #
 
@@ -89,7 +90,7 @@ farm.select.adjusted <- function (Y, X,   loss=c("lasso", "scad", "mcp"), ...){
 #' Adjusting a data matrix for underlying factors
 #'
 #' Given a matrix of covariates, this function estimates the underlying factors and computes data residuals after regressing out those factors.
-#' @param Y a n x 1 outcome vector.
+#' @param Y a size n outcome vector.
 #' @param X a n x p data matrix with each row being a sample.
 #' @param K.factors a \emph{optional} number of factors to be estimated. Otherwise estimated internally.
 # #' @param robust.cov an \emph{optional} boolean, specifying whether or not to use a robust covariance matrix for factor adjustment. Default is FALSE.
@@ -98,7 +99,10 @@ farm.select.adjusted <- function (Y, X,   loss=c("lasso", "scad", "mcp"), ...){
 #' \item{loadings}{estimated factor loadings}
 #' \item{factors}{estimated factors}
 #' \item{nfactors}{the number of (estimated) factors}
-
+#' \item{X.res}{the decorrelated covariate matrix}
+#' \item{Y.res}{the decorrelated response vector}
+#' @details For details about the method, see Fan et al.(2017).
+#' @details For formula of how the covariates and the repsonse vector are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
 # #' @details Using \code{robust.cov = TRUE} uses the Huber's loss to estimate the covariance matrix. For details of covariance estimation method see Fan et al.(2017).
 #' @details Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
 #' @details Number of latent factors, if not provided, is estimated by the eignevalue ratio test. See Ahn and Horenstein(2013).
@@ -116,12 +120,14 @@ farm.select.adjusted <- function (Y, X,   loss=c("lasso", "scad", "mcp"), ...){
 #' beta = c(beta_1, rep(0,P-Q))
 #' eps=0.1*rnorm(N)
 #' Y=t(X)%*%beta+eps
-#' output = farm.adjust(X,Y)
+#' output = farm.adjust(Y,X)
 #'
 #' @references Ahn, S. C., and A. R. Horenstein (2013): "Eigenvalue Ratio Test for the Number of Factors," Econometrica, 81 (3), 1203–1227.
+#' @references Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/pdf/1612.08490.pdf}
 #' @export
 farm.adjust<- function(Y, X ,K.factors = NULL) {#, robust.cov = FALSE) {
-
+  X = sweep(X, 1, apply(X, 1, mean))
+  Y  = Y-mean(Y)
   nx = NCOL(X)
   p = NROW(X)
   if(min(nx,p)<=4) stop('n and p must be at least 4')
@@ -145,39 +151,43 @@ farm.adjust<- function(Y, X ,K.factors = NULL) {#, robust.cov = FALSE) {
 
   #using K.factors estimate the factors and loadings
   P_F = Find_factors( (X), nx, p,  K.factors)
-  Y_star = Find_Y_star ( P_F, Y)
-  U = Find_loading (P_F, X)
+  Y.res = Find_Y_star ( P_F, Y)
+  X.res = Find_loading (P_F, X)
 
   #output
-  list(X.res = U, nfactors = K.factors, Y.res = Y_star)
+  list(X.res = X.res, nfactors = K.factors, Y.res = Y.res)
 }
 
-farm.select.temp<- function(X, Y, U, Y_star,loss)
+farm.select.temp<- function(Y, X, X.res, Y.res,loss)
 {
-
+  N = length(Y.res)
   if (loss == "scad"){
-    CV_SCAD=cv.ncvreg(U, Y_star,penalty="SCAD")
+    CV_SCAD=cv.ncvreg(X.res, Y.res,penalty="SCAD",seed = 100, nfolds = ceiling(N/3))
     beta_SCAD=coef(CV_SCAD, s = "lambda.min", exact=TRUE)
     inds_SCAD=which(beta_SCAD!=0)
     inds_SCAD = inds_SCAD[ - which(inds_SCAD ==1)]
-    inds_SCAD=inds_SCAD-1
-    list(beta_chosen= inds_SCAD, coef_chosen=beta_SCAD[beta_SCAD!=0] )
+    coef_chosen = beta_SCAD[inds_SCAD]
+    inds_SCAD = inds_SCAD-1
+    list(beta_chosen= inds_SCAD, coef_chosen=coef_chosen )
   }
-  else if (loss == "mcp"){
-    CV_MCP=cv.ncvreg(U, Y_star,penalty="MCP")
+  else if (loss == "lasso"){
+    CV_lasso=cv.ncvreg(X.res, Y.res,penalty="lasso", seed = 100,nfolds = ceiling(N/3))
+    beta_lasso=coef(CV_lasso, s = "lambda.min", exact=TRUE)
+    inds_lasso=which(beta_lasso!=0)
+    inds_lasso = inds_lasso[ - which(inds_lasso ==1)]
+    coef_chosen = beta_lasso[inds_lasso]
+    inds_lasso = inds_lasso-1
+    list(beta_chosen= inds_lasso, coef_chosen=coef_chosen )
+  }else {
+
+    CV_MCP=cv.ncvreg(X.res, Y.res,penalty="MCP",seed=100,nfolds = ceiling(N/3))
     beta_MCP=coef(CV_MCP, s = "lambda.min", exact=TRUE)
     inds_MCP=which(beta_MCP!=0)
     inds_MCP = inds_MCP[ - which(inds_MCP ==1)]
-    inds_MCP=inds_MCP-1
-    list(beta_chosen= inds_MCP, coef_chosen=beta_MCP[beta_MCP!=0] )
-  }else {
-    CV_1=cv.glmnet(U, Y_star)
-    beta_1=as.vector(coef(CV_1, s = "lambda.min", exact=TRUE))
-    inds_1=which(beta_1!=0)
-    inds_1 = inds_1[ - which(inds_1 ==1)]
-    inds_1=inds_1-1
-    list(beta_chosen= inds_1, coef_chosen=beta_1[beta_1!=0] )
-  }
+    coef_chosen = beta_MCP[inds_MCP]
+    inds_MCP = inds_MCP-1
+    list(beta_chosen= inds_MCP, coef_chosen=coef_chosen )
 
+  }
 
 }

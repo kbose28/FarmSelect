@@ -6,14 +6,14 @@ FarmSelect: Factor Adjusted Robust Model Selection
 Goal of the package
 -------------------
 
-This R package implements a consistent model selection strategy for high dimensional sparse regression when the covariate dependence can be reduced through factor models. By separating the latent factors from idiosyncratic components, the problem is transformed from model selection with highly correlated covariates to that with weakly correlated variables. It is appropriate for cases where we have many variables compared to the number of samples. Moreover, it implements a robust procedure to estimate distribution parameters wherever possible, hence being suitable for cases when the underlying distribution deviates from Gaussianity, which is commonly assumed in the literature. See the paper on this method, Fan et al.(2017)<https://arxiv.org/pdf/1612.08490.pdf>, for detailed description of methods and further references.
+This R package implements a consistent model selection strategy for high dimensional sparse regression when the covariate dependence can be reduced through factor models. By separating the latent factors from idiosyncratic components, the problem is transformed from model selection with highly correlated covariates to that with weakly correlated variables. It is appropriate for cases where we have many variables compared to the number of samples. Moreover, it implements a robust procedure to estimate distribution parameters wherever possible, hence being suitable for cases when the underlying distribution deviates from Gaussianity, which is commonly assumed in the literature. See the paper on this method, Fan et al.(2017) <https://arxiv.org/pdf/1612.08490.pdf>, for detailed description of methods and further references.
 
-The observed data *x*<sub>*i*, *j*</sub> is assumed to follow a factor model ![equation](https://latex.codecogs.com/gif.latex?\mathbf%7Bx%7D_i&space;=&space;\mathbf%7BBf%7D_i&space;+\mathbf%7Bu%7D_i), where *f* are the underlying factors, *B* are the factors loadings, *u* are the errors, and *μ* is the mean effect to be tested. We assume the data is of dimension *p* and the sample size is *n*, leading to *p* hypothesis tests.
+Let there be *n* covariates and *p* samples. Let us model the relationship between the response vector *Y* and the covariates *X* as ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BY%7D%20%3D%20%5Cmathbf%7BX%7D%5Cbm%7B%5Cbeta%7D%20+%20%5Cepsilon). Here *β* is a vector of size *p*. Non-zero values in this vector *β* denote which covariates truly belong in the model. For the covariates, assume the approximate factor model: ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BX%7D%20%3D%20%5Cmathbf%7BFB%7D%5E%7BT%7D%20+%20%5Cmathbf%7BU%7D), where *F* are the *K* underlying factors, *B* are the factor loadings and *U* are the errors.
 
 Installation
 ------------
 
-You can install FarmTest from github with:
+You can install FarmSelect from github with:
 
 ``` r
 install.packages("devtools")
@@ -44,68 +44,93 @@ Issues
 Functions
 ---------
 
-There are three functions available.
+There are two functions available.
 
--   `farm.test`: The main function farm.test which carries out the entire hypothesis testing procedure.
--   `farm.FDR`: Apply FDR control to a list of input p-values. This function rejects hypotheses based on a modified Benjamini- Hochberg procedure, where the proportion of true nulls is estimated using the method in \[@storey2015\].
--   `farm.scree`: Estimate the number of factors if it is unknown. The farm.scree function also generates two plots to illustrate how the number of latent factors is calculated.
+-   `farm.select`: The main function farm.test which carries out the entire model testing procedure.
+-   `farm.adjust`: Adjusts the data for latent fators.
 
-Simple hypothesis testing example
----------------------------------
+Also see the [`farm.scree`](https://www.rdocumentation.org/packages/FarmTest/versions/1.0.0/topics/farm.scree) function in the [`FarmTest`](https://cran.r-project.org/web/packages/FarmTest/index.html) package for how to generate diagnostic plots and output to evaluate the factor adjustment step.
 
-Here we generate data from a factor model with 3 factors. We have 20 samples of 100 dimensional data. The first five means are set to 2, while the other ones are 0. We conduct a hypotheses test for these means.
+Main function example: model selection
+--------------------------------------
+
+Here we generate data from a factor model with 3 factors. We have 50 samples of 100 dimensional data. The model is of size 5, where the first 5 covariates model coefficients being non-zero and the rest zero. The factors, loadings, erros are all generated from a normal distribution.
 
 ``` r
-#library(FarmSelect)
-#set.seed(100)
-#p = 100
-#n = 20
-#epsilon = matrix(rnorm( p*n, 0,1), nrow = n)
-#B = matrix(rnorm(p*3,0,1), nrow=p)
-#fx = matrix(rnorm(3*n, 0,1), nrow = n)
-#mu = rep(0, p)
-#mu[1:5] = 2
-#X = rep(1,n)%*%t(mu)+fx%*%t(B)+ epsilon
-#output = farm.test(X)
+library(FarmSelect)
+set.seed(100)
+P = 100 #dimension
+N = 50 #samples
+K = 3 #nfactors
+Q = 5 #model size
+Lambda=matrix(rnorm(P*K, 0,1), P,K)#factor loadings
+F=matrix(rnorm(N*K, 0,1), N,K)#factors
+UU=matrix(rnorm(P*N, 0,1), P,N)#errors
+X=Lambda%*%t(F)+UU
+beta_1=3+3*runif(Q)#model coefficients
+beta = c(beta_1, rep(0,P-Q))
+eps=rnorm(N)
+Y=t(X)%*%beta+eps
+output = farm.select(Y,X)
+#> Call:
+#> farm.select(Y = Y, X = X)
+#> 
+#>  Factor Adjusted Robust Model Selection 
+#> loss function used: mcp
+#> 
+#> p = 100, n = 50
+#> size of model selected:
+#>  5
 ```
 
-Now we carry out a one-sided test, with the FDR to be controlled at 1%. Then we examine the output
+``` r
+names(output)
+#> [1] "beta.chosen" "coef.chosen" "nfactors"    "X.res"       "Y.res"
+```
+
+The values X.res and Y.res are the covariates and responses after adjusting for latent factors. The formulas for these are ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BY.res%7D%20%3D%20%28%5Cmathbf%7BI%7D_n-%5Cmathbf%7BP%7D%29%20%5Cmathbf%7BY%7D) and ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BX.res%7D%20%3D%20%28%5Cmathbf%7BI%7D_n-%5Cmathbf%7BP%7D%29%20%5Cmathbf%7BX%7D%5E%7BT%7D), where ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BP%7D%3D%5Chat%7B%5Cmathbf%7BF%7D%7D%28%5Chat%7B%5Cmathbf%7BF%7D%7D%5E%7BT%7D%5Chat%7B%5Cmathbf%7BF%7D%7D%29%5E%7B-1%7D%5Chat%7B%5Cmathbf%7BF%7D%7D%5E%7BT%7D).
+
+Now we use a different loss function for the model selection step.
 
 ``` r
-#output = farm.test(X, alpha = 0.01,alternative = "greater")
-#names(output)
-#print(output$rejected)
-#hist(output$means, 10, main = "Estimated Means", xlab = "")
+output = farm.select(Y,X, loss = "scad" )
+#> Call:
+#> farm.select(Y = Y, X = X, loss = "scad")
+#> 
+#>  Factor Adjusted Robust Model Selection 
+#> loss function used: scad
+#> 
+#> p = 100, n = 50
+#> size of model selected:
+#>  5
 ```
 
 Other functions
 ---------------
 
-The function `farm.scree` makes some informative plots. It is possible to specify the maximum number of factors to be considered and the maximum number of eigenvalues to be calculated in this function. We recommend min(n,p)/2 as a conservative threshold for the number of factors; this also prevents numerical inconsistencies like extremely small eigenvalues which can blow up the eigenvalue ratio test.
+The function `farm.adjust` adjusts the dataset for latent factors. The number of factors is estimated internally by using the method in (Ahn and Horenstein 2013).
 
 ``` r
-#output = farm.scree(X, K.factors = 15, K.scree = 10)
+output = farm.adjust(Y,X)
+names(output)
+#> [1] "X.res"    "nfactors" "Y.res"
 ```
 
-We see a warning telling us that it is not a good idea to calculate 15 eigenvalues from a dataset that has only 20 samples.
-
-Let us generate data from a Gaussian distribution with mean 0. Suppose we perform a simple `t.test` in R and need to adjust the output p-values for multiple testing. The function `farm.FDR` lets us carry out multiple comparison adjustment and outputs rejected hypotheses. We see that there are no rejections, as expected from a zero-mean Gaussian distribution.
+If known, we can provide this function (or the main function) the number of latent factors. Providing too large a number results in a warning message. The maximum number of factors possible is max(*n*, *p*) but a much smaller number is recommended.
 
 ``` r
-#set.seed(100)
-#Y = matrix(rnorm(1000, 0, 1),10)
-#pval = apply(Y, 1, function(x) t.test(x)$p.value)
-#output = farm.FDR(pval)
-#output$rejected
+output = farm.adjust(Y,X, K.factors  = 30)
+#> Warning in farm.adjust(Y, X, K.factors = 30): Number of factors supplied is
+#> > min(n,p)/2. May cause numerical inconsistencies
 ```
+
+We see a warning telling us that it is not a good idea to calculate 30 eigenvalues from a dataset that has only 50 samples.
 
 Notes
 -----
 
-1.  If some of the underlying factors are known but it is suspected that there are more confounding factors that are unobserved: Suppose we have data ![equation](https://latex.codecogs.com/gif.latex?X%20%3D%20%5Cmu%20+%20Bf%20+%20Cg%20+%20u), where *f* is observed and *g* is unobserved. In the first step, the user passes the data {*X*, *f*} into the main function. From the output, let us construct the residuals: ![equation](https://latex.codecogs.com/gif.latex?Xres%20%3D%20X%20-%20Bf). Now pass ![equation](https://latex.codecogs.com/gif.latex?Xres) into the main function, without any factors. The output in this step is the final answer to the testing problem.
+1.  Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
 
-2.  Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
+2.  The covariates do not need to be de-meaned before insertion into the function, this is done internally.
 
-3.  The farm.FDR function uses code from the [`pi0est`](https://www.rdocumentation.org/packages/qvalue/versions/2.4.2/topics/pi0est) function in the [`qvalue`](http://bioconductor.org/packages/release/bioc/html/qvalue.html) package \[@storey2015\] to estimate the number of true null hypotheses, and inherits all the options from `pi0est`.
-
-4.  See individual function documentation for detailed description of methods and their references.
+Ahn, SC, and AR Horenstein. 2013. “Eigenvalue Ratio Test for the Number of Factors.” Econometrica.
