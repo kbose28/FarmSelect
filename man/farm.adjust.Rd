@@ -4,14 +4,16 @@
 \alias{farm.adjust}
 \title{Adjusting a data matrix for underlying factors}
 \usage{
-farm.adjust(Y, X, K.factors = NULL)
+farm.adjust(Y, X, K.factors = NULL, robust = FALSE)
 }
 \arguments{
-\item{Y}{a n x 1 outcome vector.}
+\item{Y}{a size n outcome vector.}
 
 \item{X}{a n x p data matrix with each row being a sample.}
 
 \item{K.factors}{a \emph{optional} number of factors to be estimated. Otherwise estimated internally.}
+
+\item{robust}{an \emph{optional} boolean, specifying whether or not to use robust estimators for mean and variance. Default is FALSE.}
 }
 \value{
 A list with the following items

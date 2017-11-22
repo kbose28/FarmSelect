@@ -79,6 +79,7 @@ output = farm.select(Y,X)
 #> loss function used: mcp
 #> 
 #> p = 100, n = 50
+#> factors found: 3
 #> size of model selected:
 #>  5
 ```
@@ -93,14 +94,31 @@ The values X.res and Y.res are the covariates and responses after adjusting for 
 Now we use a different loss function for the model selection step.
 
 ``` r
-output = farm.select(Y,X, loss = "scad" )
+output = farm.select(Y,X, loss = "lasso" )
 #> Call:
-#> farm.select(Y = Y, X = X, loss = "scad")
+#> farm.select(Y = Y, X = X, loss = "lasso")
 #> 
 #>  Factor Adjusted Robust Model Selection 
-#> loss function used: scad
+#> loss function used: lasso
 #> 
 #> p = 100, n = 50
+#> factors found: 3
+#> size of model selected:
+#>  5
+```
+
+We may also use robust estimates of all the parameters. This may take more time, depending upon the dimension size of the problem.
+
+``` r
+output = farm.select(Y,X, robust = TRUE )
+#> Call:
+#> farm.select(Y = Y, X = X, robust = TRUE)
+#> 
+#>  Factor Adjusted Robust Model Selection 
+#> loss function used: mcp
+#> 
+#> p = 100, n = 50
+#> factors found: 3
 #> size of model selected:
 #>  5
 ```

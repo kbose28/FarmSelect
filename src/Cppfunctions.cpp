@@ -128,6 +128,7 @@ arma::mat Huber_descent (arma::mat X, arma::mat phi, arma::mat B, float CT)
 
 
 
+
 //Robust estimation with Huber loss
 // [[Rcpp::export]]
 float Robust_CV (arma::mat vx, arma::mat phi)
@@ -216,13 +217,76 @@ arma::mat Robust_estimate (arma::mat X, arma::mat phi, arma::mat B, float CT)
   return B_hat;
 
 }
+
+
+// [[Rcpp::export]]
+arma::mat mu_robust_F( arma::mat X, arma::mat phi)
+{
+  using namespace arma;
+  int i, P, N, K;
+  P=X.n_rows;    N=X.n_cols;
+  K=phi.n_cols;
+
+  float Tau;
+  mat F_H_0; F_H_0.ones(K);
+  mat Xi;
+  mat mu_hat; mu_hat.zeros(K,P);
+
+  for(i=0;i<P;i++){
+    Rcpp::checkUserInterrupt();
+    Xi=X.row(i);
+    F_H_0=solve(phi,trans(Xi));
+    Tau= Robust_CV (trans(Xi),(phi));
+    mu_hat.col(i)=Huber_descent(Xi, phi, F_H_0, Tau);
+  }
+  return mu_hat;
+
+}
+
+
+//Output: Estimated cov matrix Sigma_hat
+// [[Rcpp::export]]
+arma::mat Cov_Huber( arma::mat X, arma::mat phi)
+{
+  using namespace arma;
+  int i, j, P=X.n_rows;
+
+  //Tuning parameter
+  float Tau;
+
+  //Define the matrices
+  mat Xi, Xj;
+  mat Sigma_hat; Sigma_hat.zeros(P,P);
+  mat F_H_0; F_H_0.ones(1);
+
+  //Entry-wise Huber method
+  for(i=0;i<P;i++){
+    Rcpp::checkUserInterrupt();
+    for(j=0;j<=i;j++){
+      Xi=X.row(i); Xj=X.row(j);
+      F_H_0=solve(phi,trans(Xi%Xj));
+      Tau= Robust_CV (trans(Xi%Xj), phi);
+      Sigma_hat(i,j)=arma::conv_to<double>::from(Huber_descent (Xi%Xj,phi, F_H_0, Tau));
+      Sigma_hat(j,i)=Sigma_hat(i,j);
+    }
+  }
+
+
+  return Sigma_hat;
+
+}
+
+
+
+
 //Find factors
 // [[Rcpp::export]]
-arma::mat Find_factors (arma::mat X, int N, int P, int K)
+arma::mat Find_factors (arma::mat Sigma, arma::mat X, int N, int P, int K)
 {
   using namespace arma;
 
-  mat XX;             XX.zeros(N, N);
+
+//mat XX;             XX.zeros(N, N);
   vec eigval_cov;     eigval_cov.zeros(N);
   mat eigvec_cov;     eigvec_cov.zeros(N,N);
   mat F_hat;          F_hat.zeros(N,K);
@@ -230,12 +294,11 @@ arma::mat Find_factors (arma::mat X, int N, int P, int K)
 
 
   //PCA on XPX, eatimate loadings by the first K eigenvectors
-  XX= X *  X.t();
+  //XX= X *  X.t();
 
-  eig_sym(eigval_cov, eigvec_cov, XX);
+  eig_sym(eigval_cov, eigvec_cov, Sigma);
   eigval_cov=sort(eigval_cov,"descend");
   eigvec_cov=fliplr(eigvec_cov);
-
   Lambda_hat=eigvec_cov.cols(0,K-1)* sqrt(P);
 
   //Estimate Factors
@@ -260,7 +323,7 @@ arma::mat Find_Y_star (arma::mat P_F,arma::mat Y)
 
 //Find factors
 // [[Rcpp::export]]
-arma::mat Find_loading (arma::mat P_F, arma::mat X)
+arma::mat Find_X_star(arma::mat P_F, arma::mat X)
 {   using namespace arma;
  mat U_star;  U_star=X*P_F;
   //U_star= (X-Lambda_hat*F_hat.t())*P_F;
@@ -287,7 +350,8 @@ arma::mat Eigen_Decomp( arma::mat M)
   eigvec_cov=fliplr(eigvec_cov);
   eigall_cov = join_rows(eigvec_cov, eigval_cov);
 
-
   return eigall_cov;
 
 }
+
+

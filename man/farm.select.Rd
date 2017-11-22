@@ -4,16 +4,19 @@
 \alias{farm.select}
 \title{Factor-adjusted robust model selection}
 \usage{
-farm.select(Y, X, loss = c("mcp", "scad", "lasso"), verbose = TRUE, ...)
+farm.select(Y, X, loss = c("mcp", "scad", "lasso"), verbose = TRUE,
+  robust = FALSE, ...)
 }
 \arguments{
-\item{Y}{a n x 1 outcome vector.}
+\item{Y}{a size n outcome vector.}
 
 \item{X}{a p x n covariate matrix with each row being a sample. Must have same number of columns as the size of \code{Y}.}
 
 \item{loss}{an \emph{optional} character string specifying the loss function to be minimized. Must be one of "mcp" (default), "scad" or "lasso". You can just specify the initial letter.}
 
-\item{verbose}{an \emph{optional} logical determining whether or not to print output to the console. Default is TRUE.}
+\item{verbose}{an \emph{optional} boolean determining whether or not to print output to the console. Default is TRUE.}
+
+\item{robust}{an \emph{optional} boolean, specifying whether or not to use robust estimators for mean and variance. Default is FALSE.}
 
 \item{\dots}{Arguments passed to the \code{\link{farm.adjust}} function.}
 }

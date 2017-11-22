@@ -29,16 +29,24 @@ Robust_estimate <- function(X, phi, B, CT) {
     .Call('_FarmSelect_Robust_estimate', PACKAGE = 'FarmSelect', X, phi, B, CT)
 }
 
-Find_factors <- function(X, N, P, K) {
-    .Call('_FarmSelect_Find_factors', PACKAGE = 'FarmSelect', X, N, P, K)
+mu_robust_F <- function(X, phi) {
+    .Call('_FarmSelect_mu_robust_F', PACKAGE = 'FarmSelect', X, phi)
+}
+
+Cov_Huber <- function(X, phi) {
+    .Call('_FarmSelect_Cov_Huber', PACKAGE = 'FarmSelect', X, phi)
+}
+
+Find_factors <- function(Sigma, X, N, P, K) {
+    .Call('_FarmSelect_Find_factors', PACKAGE = 'FarmSelect', Sigma, X, N, P, K)
 }
 
 Find_Y_star <- function(P_F, Y) {
     .Call('_FarmSelect_Find_Y_star', PACKAGE = 'FarmSelect', P_F, Y)
 }
 
-Find_loading <- function(P_F, X) {
-    .Call('_FarmSelect_Find_loading', PACKAGE = 'FarmSelect', P_F, X)
+Find_X_star <- function(P_F, X) {
+    .Call('_FarmSelect_Find_X_star', PACKAGE = 'FarmSelect', P_F, X)
 }
 
 Eigen_Decomp <- function(M) {
