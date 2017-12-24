@@ -12,7 +12,12 @@ output: md_document
 
 ## R CMD check results
 
-There were NO ERRORs, WARNINGs, or NOTEs 
+ -There were NO ERRORs, WARNINGs
+ -1 NOTE 
+ Possibly mis-spelled words in DESCRIPTION:
+  covariates (5:88)
+  
+  This is spelled correctly.
  
 ## Downstream dependencies
    There are currently no downstream dependencies for this package

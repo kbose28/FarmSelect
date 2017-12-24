@@ -134,9 +134,9 @@ arma::mat Huber_descent (arma::mat X, arma::mat phi, arma::mat B, float CT)
 float Robust_CV (arma::mat vx, arma::mat phi)
 {
   using namespace arma;
-  int i,k,T=phi.n_rows, J=phi.n_cols, T_train=0, T_vali=0;
+  int i,k,T=phi.n_rows, J=phi.n_cols,  T_vali=0;
   float MSE_vali, MSE_small, ct_o=5, ct;
-  T_vali=T/5;     T_train=T-T_vali;
+  T_vali=T/5;
 
   mat vx_1;      mat vx_2;
   mat vx_train;  mat vx_vali;    mat vx_hat;
@@ -223,8 +223,8 @@ arma::mat Robust_estimate (arma::mat X, arma::mat phi, arma::mat B, float CT)
 arma::mat mu_robust_F( arma::mat X, arma::mat phi)
 {
   using namespace arma;
-  int i, P, N, K;
-  P=X.n_rows;    N=X.n_cols;
+  int i, P, K;
+  P=X.n_rows;
   K=phi.n_cols;
 
   float Tau;
