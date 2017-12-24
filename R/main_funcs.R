@@ -224,3 +224,57 @@ farm.select.temp<- function(Y, X, X.res, Y.res,loss)
   }
 
 }
+
+
+
+#################### huber mean calculation ##############################################
+#' Mean estimation with Huber's loss function
+#'
+#' This function estimates mean of multivariate data using the Huber's loss. The tuning parameter is chosen by cross validation.
+#' @param X a n x p data matrix with each row being a sample.
+
+#' @return A list with the following items
+#' \item{covhat}{the covariance matrix}
+#' @examples
+#' set.seed(100)
+#' p = 20
+#' n = 10
+#' X = matrix(rnorm( p*n, 0,1), nrow = n)
+#' muhat = farm.mean(X)
+#'
+#' @references Huber, P.J. (1964). "Robust Estimation of a Location Parameter." The Annals of Mathematical Statistics, 35, 73–101.
+#' @export
+farm.mean <- function (X){
+  X = t(X)
+  p  = NROW(X)
+  n = NCOL(X)
+  muhat = mu_robust_F(matrix(X,p,n), matrix(rep(1,n),n,1))
+  return(muhat)
+}
+
+
+
+#################### huber covariance calculation ##############################################
+#' Covariance estimation with Huber's loss function
+#'
+#' This function estimates covariance of multivariate data using the Huber's loss. The tuning parameter is chosen by cross validation.
+#' @param X an n x p data matrix with each row being a sample.
+
+#' @return A list with the following items
+#' \item{covhat}{the covariance matrix}
+#' @examples
+#' set.seed(100)
+#' p = 20
+#' n = 10
+#' X = matrix(rnorm( p*n, 0,1), nrow = n)
+#' covhat = farm.cov(X)
+#'
+#' @references Huber, P.J. (1964). "Robust Estimation of a Location Parameter." The Annals of Mathematical Statistics, 35, 73–101.
+#' @export
+farm.cov <- function (X){
+  X = t(X)
+  p  = NROW(X)
+  n = NCOL(X)
+  covhat = Cov_Huber(matrix((X),p,n),  matrix(rep(1,n),n,1))
+  return(covhat)
+}

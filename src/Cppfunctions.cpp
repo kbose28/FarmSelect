@@ -150,7 +150,7 @@ float Robust_CV (arma::mat vx, arma::mat phi)
   for(i=1,MSE_small=1.0e8, ct_o=1.0e8; i<=21; i++){
 
     ct=(abs(vx).max())*i/20;
-    if(i==51)ct=1.0e7;
+    if(i==21)ct=1.0e7;
 
 
     for(k=0, MSE_vali=0; k<5; k++){

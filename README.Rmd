@@ -74,6 +74,8 @@ There are two functions available.
 
 * `farm.select`: The main function farm.test which carries out the entire model testing procedure.
 * `farm.adjust`: Adjusts the data for latent fators.
+* `farm.mean`: Multivariate mean estimation with Huber's loss.
+* `farm.cov`: Multivariate covariance estimation with Huber's loss. 
 
 Also see the [`farm.scree`](https://www.rdocumentation.org/packages/FarmTest/versions/1.0.0/topics/farm.scree) function in the [`FarmTest`](https://cran.r-project.org/web/packages/FarmTest/index.html)
  package for how to generate diagnostic plots and output to evaluate the factor adjustment step.
