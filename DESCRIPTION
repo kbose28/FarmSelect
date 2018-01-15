@@ -22,3 +22,4 @@ LinkingTo: Rcpp, RcppArmadillo
 NeedsCompilation: yes
 Suggests: knitr,
     rmarkdown
+VignetteBuilder: knitr
