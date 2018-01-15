@@ -10,7 +10,7 @@ farm.select(Y, X, loss = c("mcp", "scad", "lasso"), verbose = TRUE,
 \arguments{
 \item{Y}{a size n outcome vector.}
 
-\item{X}{a p x n covariate matrix with each row being a sample. Must have same number of columns as the size of \code{Y}.}
+\item{X}{an n x p covariate matrix with each row being a sample. Must have same number of rows as the size of \code{Y}.}
 
 \item{loss}{an \emph{optional} character string specifying the loss function to be minimized. Must be one of "mcp" (default), "scad" or "lasso". You can just specify the initial letter.}
 
@@ -44,14 +44,15 @@ P = 100 #dimension
 N = 50 #samples
 K = 3 #nfactors
 Q = 5 #model size
-Lambda=matrix(rnorm(P*K, 0,1), P,K)
-F=matrix(rnorm(N*K, 0,1), N,K)
-UU=matrix(rnorm(P*N, 0,1), P,N)
-X=Lambda\%*\%t(F)+UU
-beta_1=3+3*runif(Q)
+Lambda = matrix(rnorm(P*K, 0,1), P,K)
+F = matrix(rnorm(N*K, 0,1), N,K)
+UU = matrix(rnorm(P*N, 0,1), P,N)
+X = Lambda\%*\%t(F)+UU
+X = t(X)
+beta_1 = 3+3*runif(Q)
 beta = c(beta_1, rep(0,P-Q))
-eps=rnorm(N)
-Y=t(X)\%*\%beta+eps
+eps = rnorm(N)
+Y = X\%*\%beta+eps
 output = farm.select(Y,X)
 }
 \references{

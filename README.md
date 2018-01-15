@@ -8,7 +8,7 @@ Goal of the package
 
 This R package implements a consistent model selection strategy for high dimensional sparse regression when the covariate dependence can be reduced through factor models. By separating the latent factors from idiosyncratic components, the problem is transformed from model selection with highly correlated covariates to that with weakly correlated variables. It is appropriate for cases where we have many variables compared to the number of samples. Moreover, it implements a robust procedure to estimate distribution parameters wherever possible, hence being suitable for cases when the underlying distribution deviates from Gaussianity, which is commonly assumed in the literature. See the paper on this method, Fan et al.(2017) <https://arxiv.org/pdf/1612.08490.pdf>, for detailed description of methods and further references.
 
-Let there be *n* covariates and *p* samples. Let us model the relationship between the response vector *Y* and the covariates *X* as ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BY%7D%20%3D%20%5Cmathbf%7BX%7D%5Cbm%7B%5Cbeta%7D%20+%20%5Cepsilon). Here *β* is a vector of size *p*. Non-zero values in this vector *β* denote which covariates truly belong in the model. For the covariates, assume the approximate factor model: ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BX%7D%20%3D%20%5Cmathbf%7BFB%7D%5E%7BT%7D%20+%20%5Cmathbf%7BU%7D), where *F* are the *K* underlying factors, *B* are the factor loadings and *U* are the errors.
+Let there be *p* covariates and *n* samples. Let us model the relationship between the response vector *Y* and the covariates *X* as ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BY%7D%20%3D%20%5Cmathbf%7BX%7D%5Cbm%7B%5Cbeta%7D%20+%20%5Cepsilon). Here *β* is a vector of size *p*. Non-zero values in this vector *β* denote which covariates truly belong in the model. For the covariates, assume the approximate factor model: ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BX%7D%20%3D%20%5Cmathbf%7BFB%7D%5E%7BT%7D%20+%20%5Cmathbf%7BU%7D), where *F* are the *K* underlying factors, *B* are the factor loadings and *U* are the errors.
 
 Installation
 ------------
@@ -65,14 +65,15 @@ P = 100 #dimension
 N = 50 #samples
 K = 3 #nfactors
 Q = 5 #model size
-Lambda=matrix(rnorm(P*K, 0,1), P,K)#factor loadings
-F=matrix(rnorm(N*K, 0,1), N,K)#factors
-UU=matrix(rnorm(P*N, 0,1), P,N)#errors
-X=Lambda%*%t(F)+UU
-beta_1=3+3*runif(Q)#model coefficients
+Lambda = matrix(rnorm(P*K, 0,1), P,K)
+F = matrix(rnorm(N*K, 0,1), N,K)
+UU = matrix(rnorm(P*N, 0,1), P,N)
+X = Lambda%*%t(F)+UU
+X = t(X)
+beta_1 = 3+3*runif(Q)
 beta = c(beta_1, rep(0,P-Q))
-eps=rnorm(N)
-Y=t(X)%*%beta+eps
+eps = rnorm(N)
+Y = X%*%beta+eps 
 output = farm.select(Y,X)
 #> Call:
 #> farm.select(Y = Y, X = X)

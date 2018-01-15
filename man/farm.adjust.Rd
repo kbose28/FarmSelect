@@ -4,12 +4,12 @@
 \alias{farm.adjust}
 \title{Adjusting a data matrix for underlying factors}
 \usage{
-farm.adjust(Y, X, K.factors = NULL, robust = FALSE)
+farm.adjust(Y = NULL, X, K.factors = NULL, robust = FALSE)
 }
 \arguments{
-\item{Y}{a size n outcome vector.}
+\item{Y}{a size n outcome vector, \emph{optional}.}
 
-\item{X}{a n x p data matrix with each row being a sample.}
+\item{X}{an n x p data matrix with each row being a sample. Must have same number of rows as the size of \code{Y}.}
 
 \item{K.factors}{a \emph{optional} number of factors to be estimated. Otherwise estimated internally.}
 
@@ -42,14 +42,15 @@ P = 100 #dimension
 N = 50 #samples
 K = 3 #nfactors
 Q = 5 #model size
-Lambda=matrix(rnorm(P*K, 0,1), P,K)
-F=matrix(rnorm(N*K, 0,1), N,K)
-UU=matrix(rnorm(P*N, 0,1), P,N)
-X=Lambda\%*\%t(F)+UU
-beta_1=3+3*runif(Q)
+Lambda = matrix(rnorm(P*K, 0,1), P,K)
+F = matrix(rnorm(N*K, 0,1), N,K)
+UU = matrix(rnorm(P*N, 0,1), P,N)
+X = Lambda\%*\%t(F)+UU
+X = t(X)
+beta_1 = 3+3*runif(Q)
 beta = c(beta_1, rep(0,P-Q))
-eps=0.1*rnorm(N)
-Y=t(X)\%*\%beta+eps
+eps = rnorm(N)
+Y = X\%*\%beta+eps
 output = farm.adjust(Y,X)
 
 }

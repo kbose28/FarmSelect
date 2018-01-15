@@ -11,7 +11,7 @@ farm.mean(X)
 }
 \value{
 A list with the following items
-\item{covhat}{the covariance matrix}
+\item{muhat}{the mean vector}
 }
 \description{
 This function estimates mean of multivariate data using the Huber's loss. The tuning parameter is chosen by cross validation.
