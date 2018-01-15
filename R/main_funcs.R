@@ -15,7 +15,7 @@ NULL
 #'
 #' Given a covariate matrix and output vector, this function first adjusts the covariates for underlying factors and then performs model selection.
 #' @param Y a size n outcome vector.
-#' @param X a p x n covariate matrix with each row being a sample. Must have same number of columns as the size of \code{Y}.
+#' @param X an n x p covariate matrix with each row being a sample. Must have same number of rows as the size of \code{Y}.
 #' @param loss an \emph{optional} character string specifying the loss function to be minimized. Must be one of "mcp" (default), "scad" or "lasso". You can just specify the initial letter.
 #' @param verbose an \emph{optional} boolean determining whether or not to print output to the console. Default is TRUE.
 #' @param robust an \emph{optional} boolean, specifying whether or not to use robust estimators for mean and variance. Default is FALSE.
@@ -35,19 +35,21 @@ NULL
 #' N = 50 #samples
 #' K = 3 #nfactors
 #' Q = 5 #model size
-#' Lambda=matrix(rnorm(P*K, 0,1), P,K)
-#' F=matrix(rnorm(N*K, 0,1), N,K)
-#' UU=matrix(rnorm(P*N, 0,1), P,N)
-#' X=Lambda%*%t(F)+UU
-#' beta_1=3+3*runif(Q)
+#' Lambda = matrix(rnorm(P*K, 0,1), P,K)
+#' F = matrix(rnorm(N*K, 0,1), N,K)
+#' UU = matrix(rnorm(P*N, 0,1), P,N)
+#' X = Lambda%*%t(F)+UU
+#' X = t(X)
+#' beta_1 = 3+3*runif(Q)
 #' beta = c(beta_1, rep(0,P-Q))
-#' eps=rnorm(N)
-#' Y=t(X)%*%beta+eps
+#' eps = rnorm(N)
+#' Y = X%*%beta+eps
 #' output = farm.select(Y,X)
 #' @references Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/pdf/1612.08490.pdf}
 #' @export
 farm.select <- function (Y, X,  loss=c("mcp", "scad", "lasso"), verbose = TRUE, robust = FALSE, ...){
   #error checking
+  X = t(X)
   if(NCOL(X)!=NROW(Y)) stop('number of rows in covariate matrix should be size of the outcome vector')
     output.final = farm.select.adjusted(Y, X,   loss=c("mcp", "scad", "lasso"), ...)
     if(verbose){output.final.call = match.call()
@@ -82,7 +84,7 @@ farm.select.adjusted <- function (Y, X,   loss=c("mcp", "scad", "lasso"),robust 
 
   #adjust for factors
 
-  output.adjust  = farm.adjust(Y=Y, X=X,robust= robust,...)
+  output.adjust  = farm.adjust(Y=Y, X=t(X),robust= robust,...)
   #find residuals from factor adjustment
   X.res = output.adjust$X.res
   Y.res = output.adjust$Y.res
@@ -103,8 +105,8 @@ farm.select.adjusted <- function (Y, X,   loss=c("mcp", "scad", "lasso"),robust 
 #' Adjusting a data matrix for underlying factors
 #'
 #' Given a matrix of covariates, this function estimates the underlying factors and computes data residuals after regressing out those factors.
-#' @param Y a size n outcome vector.
-#' @param X a n x p data matrix with each row being a sample.
+#' @param Y a size n outcome vector, \emph{optional}.
+#' @param X an n x p data matrix with each row being a sample. Must have same number of rows as the size of \code{Y}.
 #' @param K.factors a \emph{optional} number of factors to be estimated. Otherwise estimated internally.
 #' @param robust an \emph{optional} boolean, specifying whether or not to use robust estimators for mean and variance. Default is FALSE.
 #' @return A list with the following items
@@ -125,42 +127,37 @@ farm.select.adjusted <- function (Y, X,   loss=c("mcp", "scad", "lasso"),robust 
 #' N = 50 #samples
 #' K = 3 #nfactors
 #' Q = 5 #model size
-#' Lambda=matrix(rnorm(P*K, 0,1), P,K)
-#' F=matrix(rnorm(N*K, 0,1), N,K)
-#' UU=matrix(rnorm(P*N, 0,1), P,N)
-#' X=Lambda%*%t(F)+UU
-#' beta_1=3+3*runif(Q)
+#' Lambda = matrix(rnorm(P*K, 0,1), P,K)
+#' F = matrix(rnorm(N*K, 0,1), N,K)
+#' UU = matrix(rnorm(P*N, 0,1), P,N)
+#' X = Lambda%*%t(F)+UU
+#' X = t(X)
+#' beta_1 = 3+3*runif(Q)
 #' beta = c(beta_1, rep(0,P-Q))
-#' eps=0.1*rnorm(N)
-#' Y=t(X)%*%beta+eps
+#' eps = rnorm(N)
+#' Y = X%*%beta+eps
 #' output = farm.adjust(Y,X)
 #'
 #' @references Ahn, S. C., and A. R. Horenstein (2013): "Eigenvalue Ratio Test for the Number of Factors," Econometrica, 81 (3), 1203–1227.
 #' @references Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/pdf/1612.08490.pdf}
 #' @export
-farm.adjust<- function(Y, X ,K.factors = NULL, robust = FALSE) {#, robust.cov = FALSE) {
-  n = length(Y)
+farm.adjust<- function(Y = NULL, X ,K.factors = NULL, robust = FALSE) {#, robust.cov = FALSE) {
+  X = t(X)
   p = NROW(X)
-
+  n = NCOL(X)
   if(min(n,p)<=4) stop('n and p must be at least 4')
 
-  if(abs(mean(Y))>0.00000001){
-    if(robust ==TRUE){
-      Y.mean =mu_robust_F(matrix(Y,1,n), matrix(rep(1,n),n,1))
-      Y=Y-rep(Y.mean,n)
-      }else{
-        Y  = Y-mean(Y)
-      }
-  }
   if(any(abs(rowMeans(X))>0.00000001)){
     if(robust ==TRUE){
       X.mean = mu_robust_F(matrix(X,p,n), matrix(rep(1,n),n,1))
       X = sweep(X, 1,X.mean,"-")
     }else{
-    X.mean = rowMeans(X)
-    X = sweep(X, 1,X.mean,"-")
+      X.mean = rowMeans(X)
+      X = sweep(X, 1,X.mean,"-")
     }
   }
+
+
 
   #estimate covariance matrix
  if(robust ==TRUE){
@@ -184,11 +181,24 @@ farm.adjust<- function(Y, X ,K.factors = NULL, robust = FALSE) {#, robust.cov = 
 
   #using K.factors estimate the factors and loadings
   P_F = Find_factors( Sigma = matrix(covx,p,p), (X), n, p,  K.factors)
-  Y.res = Find_Y_star ( P_F, matrix(Y,n,1))
   X.res = Find_X_star (P_F, X)
 
   #output
-  list(X.res = X.res, nfactors = K.factors, Y.res = Y.res)
+  if(is.null(Y)){
+  list(X.res = X.res, nfactors = K.factors)
+  }else {
+    if(NCOL(X)!=NROW(Y)) stop('number of rows in covariate matrix should be size of the outcome vector')
+    if(abs(mean(Y))>0.00000001){
+      if(robust ==TRUE){
+        Y.mean =mu_robust_F(matrix(Y,1,n), matrix(rep(1,n),n,1))
+        Y=Y-rep(Y.mean,n)
+      }else{
+        Y  = Y-mean(Y)
+      }
+    }
+    Y.res = Find_Y_star ( P_F, matrix(Y,n,1))
+    list(X.res = X.res, nfactors = K.factors, Y.res = Y.res)
+  }
 }
 
 farm.select.temp<- function(Y, X, X.res, Y.res,loss)
@@ -234,7 +244,7 @@ farm.select.temp<- function(Y, X, X.res, Y.res,loss)
 #' @param X a n x p data matrix with each row being a sample.
 
 #' @return A list with the following items
-#' \item{covhat}{the covariance matrix}
+#' \item{muhat}{the mean vector}
 #' @examples
 #' set.seed(100)
 #' p = 20
