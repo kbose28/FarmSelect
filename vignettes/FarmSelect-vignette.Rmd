@@ -48,22 +48,9 @@ library(FarmSelect)
 
 ##Getting help
 
-Help on the functions can be accessed by typing "?", followed by function name at the R command prompt. 
+* Help on the functions can be accessed by typing "?", followed by function name at the R command prompt. 
 
-##Issues
-
-* Error: "...could not find build tools necessary to build FarmSelect": Since `FarmSelect` relies on `C++` code, command line tools need to be installed to compile the code. For Windows you need Rtools, for Mac OS X you need to install Command Line Tools for XCode. See (https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites). 
-
-* Error: "library not found for -lgfortran/-lquadmath": It means your gfortran binaries are out of date. This is a common environment specific issue. 
-
-    1. In R 3.0.0 - R 3.3.0: Upgrading to R 3.4 is strongly recommended. Then go to the next step. Alternatively, you can try the instructions here: http://thecoatlessprofessor.com/programming/rcpp-rcpparmadillo-and-os-x-mavericks-lgfortran-and-lquadmath-error/. 
-
-    2. For >= R 3.4.* : download the installer from the here: https://gcc.gnu.org/wiki/GFortranBinaries#MacOS. Now simply run the installer. (If installer is not available for your version of OS, use the latest one.)
-
-* Error: "... .rdb': No such file or directory" Try devtools::install_github("kbose28/FarmSelect", dependencies=TRUE)
-
-* Error in RStudio even after installing XCode: "Could not find tools necessary to build FarmSelect": This is a known bug in RStudio. Try options(buildtools.check=function(action) TRUE) in RStudio to prevent RStudio from validating build tools.
-
+* For up to date information, help with installation issues and questions/comments see the project page at https://kbose28.github.io/FarmSelect/.
 
 ##Functions
 
@@ -74,7 +61,7 @@ There are four functions available.
 * `farm.mean`: Multivariate mean estimation with Huber's loss.
 * `farm.cov`: Multivariate covariance estimation with Huber's loss. 
 
-Also see the [`farm.scree`](https://www.rdocumentation.org/packages/FarmTest/versions/1.0.0/topics/farm.scree) function in the [`FarmTest`](https://cran.r-project.org/package=FarmTest)
+Also see the [`farm.scree`](https://www.rdocumentation.org/packages/FarmTest/versions/1.0.0/topics/farm.scree) function in the [`FarmTest`](https://CRAN.R-project.org/package=FarmTest)
  package for how to generate diagnostic plots and output to evaluate the factor adjustment step.
 
 ## Main function example: model selection
@@ -104,7 +91,7 @@ names(output)
 output$beta.chosen
 output$coef.chosen
 ```
-The values X.res and Y.res are the covariates and responses after adjusting for latent factors. The formulas for these are  ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BY.res%7D%20%3D%20%28%5Cmathbf%7BI%7D_n-%5Cmathbf%7BP%7D%29%20%5Cmathbf%7BY%7D) and ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BX.res%7D%20%3D%20%28%5Cmathbf%7BI%7D_n-%5Cmathbf%7BP%7D%29%20%5Cmathbf%7BX%7D%5E%7BT%7D), where ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BP%7D%3D%5Chat%7B%5Cmathbf%7BF%7D%7D%28%5Chat%7B%5Cmathbf%7BF%7D%7D%5E%7BT%7D%5Chat%7B%5Cmathbf%7BF%7D%7D%29%5E%7B-1%7D%5Chat%7B%5Cmathbf%7BF%7D%7D%5E%7BT%7D).
+The values X.res and Y.res are the covariates and responses after adjusting for latent factors. The formulas for these are $Y.\text{res} = (I_n-P)Y$ and $X.\text{res} = (I_n-P)X^T$, where $P = \hat{F}(\hat{F}^T\hat{F})^{-1}\hat{F}^T$.
 
 Now we use a different loss function for the model selection step. 
 ```{r}
@@ -128,7 +115,6 @@ output = farm.adjust(Y,X, K.factors  = 30)
 ```
 We see a warning telling us that it is not a good idea to calculate 30 eigenvalues from a dataset that has only 50 samples. 
 
-
 ## Notes 
 
 1. Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
@@ -136,7 +122,4 @@ We see a warning telling us that it is not a good idea to calculate 30 eigenvalu
 
 2. The covariates do not need to be de-meaned before insertion into the function, this is done internally. 
 
-## Questions?
-
-1. For up to date information and questions/comments see the project page at  https://kbose28.github.io/FarmSelect/.
 
