@@ -11,10 +11,7 @@ Test environments
 R CMD check results
 -------------------
 
--There were NO ERRORs, WARNINGs -1 NOTE Possibly mis-spelled words in
-DESCRIPTION: covariates (5:88)
-
-This is spelled correctly.
+-There were NO ERRORs, WARNINGs or NOTEs.
 
 Downstream dependencies
 -----------------------

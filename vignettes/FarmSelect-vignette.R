@@ -12,8 +12,8 @@ K = 3 #nfactors
 Q = 5 #model size
 Lambda = matrix(rnorm(P*K, 0,1), P,K)
 F = matrix(rnorm(N*K, 0,1), N,K)
-UU = matrix(rnorm(P*N, 0,1), P,N)
-X = Lambda%*%t(F)+UU
+U = matrix(rnorm(P*N, 0,1), P,N)
+X = Lambda%*%t(F)+U
 X = t(X)
 beta_1 = 3+3*runif(Q)
 beta = c(beta_1, rep(0,P-Q))
@@ -23,6 +23,8 @@ output = farm.select(Y,X)
 
 ## ------------------------------------------------------------------------
 names(output)
+output$beta.chosen
+output$coef.chosen
 
 ## ------------------------------------------------------------------------
 output = farm.select(Y,X, loss = "lasso" )

@@ -24,7 +24,7 @@ NULL
 #' \item{beta.chosen}{the indices of the covariates chosen in the model}
 #' \item{coef.chosen}{the coefficients of the chosen covariates}
 #' \item{X.res}{the decorrelated covariate matrix}
-#' \item{Y.res}{the decorrelated response vector}
+#' \item{Y.res}{the response vector corresponding to the decorrelated covariates}
 #' \item{nfactors}{number of (estimated) factors}
 #' @details Number of rows and columns of the covariate matrix must be at least 4 in order to be able to calculate latent factors.
 #' @details For details about the method, see Fan et al.(2017).
@@ -37,15 +37,15 @@ NULL
 #' Q = 5 #model size
 #' Lambda = matrix(rnorm(P*K, 0,1), P,K)
 #' F = matrix(rnorm(N*K, 0,1), N,K)
-#' UU = matrix(rnorm(P*N, 0,1), P,N)
-#' X = Lambda%*%t(F)+UU
+#' U = matrix(rnorm(P*N, 0,1), P,N)
+#' X = Lambda%*%t(F)+U
 #' X = t(X)
 #' beta_1 = 3+3*runif(Q)
 #' beta = c(beta_1, rep(0,P-Q))
 #' eps = rnorm(N)
 #' Y = X%*%beta+eps
 #' output = farm.select(Y,X)
-#' @references Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/pdf/1612.08490.pdf}
+#' @references Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/abs/1612.08490}
 #' @export
 farm.select <- function (Y, X,  loss=c("mcp", "scad", "lasso"), verbose = TRUE, robust = FALSE, ...){
   #error checking
@@ -115,7 +115,7 @@ farm.select.adjusted <- function (Y, X,   loss=c("mcp", "scad", "lasso"),robust 
 #' \item{factors}{estimated factors}
 #' \item{nfactors}{the number of (estimated) factors}
 #' \item{X.res}{the decorrelated covariate matrix}
-#' \item{Y.res}{the decorrelated response vector}
+#' \item{Y.res}{the response vector corresponding to the decorrelated covariates}
 #' @details For details about the method, see Fan et al.(2017).
 #' @details For formula of how the covariates and the repsonse vector are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
 # #' @details Using \code{robust.cov = TRUE} uses the Huber's loss to estimate the covariance matrix. For details of covariance estimation method see Fan et al.(2017).
@@ -129,8 +129,8 @@ farm.select.adjusted <- function (Y, X,   loss=c("mcp", "scad", "lasso"),robust 
 #' Q = 5 #model size
 #' Lambda = matrix(rnorm(P*K, 0,1), P,K)
 #' F = matrix(rnorm(N*K, 0,1), N,K)
-#' UU = matrix(rnorm(P*N, 0,1), P,N)
-#' X = Lambda%*%t(F)+UU
+#' U = matrix(rnorm(P*N, 0,1), P,N)
+#' X = Lambda%*%t(F)+U
 #' X = t(X)
 #' beta_1 = 3+3*runif(Q)
 #' beta = c(beta_1, rep(0,P-Q))
@@ -139,7 +139,7 @@ farm.select.adjusted <- function (Y, X,   loss=c("mcp", "scad", "lasso"),robust 
 #' output = farm.adjust(Y,X)
 #'
 #' @references Ahn, S. C., and A. R. Horenstein (2013): "Eigenvalue Ratio Test for the Number of Factors," Econometrica, 81 (3), 1203–1227.
-#' @references Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/pdf/1612.08490.pdf}
+#' @references Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/abs/1612.08490}
 #' @export
 farm.adjust<- function(Y = NULL, X ,K.factors = NULL, robust = FALSE) {#, robust.cov = FALSE) {
   X = t(X)

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Koushiki Bose" />
 
-<meta name="date" content="2018-01-15" />
+<meta name="date" content="2018-01-16" />
 
 <title>Factor Adjusted Robust Model Selection</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Factor Adjusted Robust Model Selection</h1>
 <h4 class="author"><em>Koushiki Bose</em></h4>
-<h4 class="date"><em>2018-01-15</em></h4>
+<h4 class="date"><em>2018-01-16</em></h4>
 
 
 
@@ -106,18 +106,18 @@ devtools::<span class="kw">install_github</span>(<span class="st">&quot;kbose28/
 </div>
 <div id="functions" class="section level2">
 <h2>Functions</h2>
-<p>There are two functions available.</p>
+<p>There are four functions available.</p>
 <ul>
-<li><code>farm.select</code>: The main function farm.test which carries out the entire model testing procedure.</li>
+<li><code>farm.select</code>: The main function which carries out the entire model testing procedure.</li>
 <li><code>farm.adjust</code>: Adjusts the data for latent fators.</li>
 <li><code>farm.mean</code>: Multivariate mean estimation with Huber’s loss.</li>
 <li><code>farm.cov</code>: Multivariate covariance estimation with Huber’s loss.</li>
 </ul>
-<p>Also see the  function in the  package for how to generate diagnostic plots and output to evaluate the factor adjustment step.</p>
+<p>Also see the <a href="https://www.rdocumentation.org/packages/FarmTest/versions/1.0.0/topics/farm.scree"><code>farm.scree</code></a> function in the <a href="https://cran.r-project.org/package=FarmTest"><code>FarmTest</code></a> package for how to generate diagnostic plots and output to evaluate the factor adjustment step.</p>
 </div>
 <div id="main-function-example-model-selection" class="section level2">
 <h2>Main function example: model selection</h2>
-<p>Here we generate data from a factor model with 3 factors. We have 50 samples of 100 dimensional data. The model is of size 5, where the first 5 covariates model coefficients being non-zero and the rest zero. The factors, loadings, erros are all generated from a normal distribution.</p>
+<p>Here we generate data from a factor model with 3 factors. We have 50 samples of 100 dimensional data. The model is of size 5, where the first 5 covariates model coefficients being non-zero and the rest zero. The factors, loadings, errors are all generated from a normal distribution.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(FarmSelect)
 <span class="kw">set.seed</span>(<span class="dv">100</span>)
 P =<span class="st"> </span><span class="dv">100</span> <span class="co">#dimension</span>
@@ -126,8 +126,8 @@ K =<span class="st"> </span><span class="dv">3</span> <span class="co">#nfactors
 Q =<span class="st"> </span><span class="dv">5</span> <span class="co">#model size</span>
 Lambda =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(P*K, <span class="dv">0</span>,<span class="dv">1</span>), P,K)
 F =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(N*K, <span class="dv">0</span>,<span class="dv">1</span>), N,K)
-UU =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(P*N, <span class="dv">0</span>,<span class="dv">1</span>), P,N)
-X =<span class="st"> </span>Lambda%*%<span class="kw">t</span>(F)+UU
+U =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(P*N, <span class="dv">0</span>,<span class="dv">1</span>), P,N)
+X =<span class="st"> </span>Lambda%*%<span class="kw">t</span>(F)+U
 X =<span class="st"> </span><span class="kw">t</span>(X)
 beta_1 =<span class="st"> </span><span class="dv">3+3</span>*<span class="kw">runif</span>(Q)
 beta =<span class="st"> </span><span class="kw">c</span>(beta_1, <span class="kw">rep</span>(<span class="dv">0</span>,P-Q))
@@ -146,6 +146,12 @@ output =<span class="st"> </span><span class="kw">farm.select</span>(Y,X)</code>
 ##  5</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(output)</code></pre></div>
 <pre><code>## [1] &quot;beta.chosen&quot; &quot;coef.chosen&quot; &quot;nfactors&quot;    &quot;X.res&quot;       &quot;Y.res&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output$beta.chosen</code></pre></div>
+<pre><code>## V1 V2 V3 V4 V5 
+##  1  2  3  4  5</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output$coef.chosen</code></pre></div>
+<pre><code>##       V1       V2       V3       V4       V5 
+## 3.706534 3.498892 4.566415 3.725966 3.297019</code></pre>
 <p>The values X.res and Y.res are the covariates and responses after adjusting for latent factors. The formulas for these are <embed src="data:image/gif;base64,R0lGODlhmgASALMAAP///wAAAHZ2dkRERLq6uu7u7jIyMhAQENzc3JiYmCIiIszMzGZmZlRUVKqqqoiIiCH5BAEAAAAALAAAAACaABIAAAT+EMhJq704651L4mAoAkkxnmiqVszqgkWbCkNgD8RUGMFhIK/g5rGQOAwKm8EgvCyQyuVBITBNCI8JzRbA6Xg+IMn2oSAU1qa6wqQkbGvMO0Bx9MSS9mRenpzTEjUBeAAGRXGICX0Sc4gWjRQ8DRQPDhWChIYWBQcBegICjogDhGN0ontwFDUKFAuTFJyeWqEXBDahTxp2AQ0ODAqWAA4DDA1eAAQMoAx6QgePqqimbL0V0BW3AbnOFgw2BAqlFgieRF0AAgE5YwvlfthN8amn05CMAWgV9RTf6+IbkgRYhKGAKgcIyrWa0GtBAAbs2HlrQLGixVoVzkTjJ2pORQPlDQhK0GdBoMho8zr0qNMDFKgBoQR5khhEY4V7IBYM2MmzZ5YLODOQvLmSw5uUBWdNsNPtigAeAQC54LRxGj6OGJDi04oShlIJBjk6IIDRoTAWFtM2wHitKtgHAggkYDBORdCscopuOIoBQQMrBrs92DaBQQI7eKKqIUW0nqUARQScTHHXwqu8XK9A8QTL1YEiBKAik0BgAEhfyYo1MEYziKKlm5dI0CmhwSEXTwQaGKChkoXQujtbHR6L95CfmVE1Jc6cg4DbGAaAboCg9TS5zbOLkJHBeIGQzWNoH8/BA3mjUkVEAAA7"></embed> and <embed src="data:image/gif;base64,R0lGODlhowAUALMAAP///wAAANzc3ERERDIyMiIiIlRUVBAQEO7u7qqqqoiIiGZmZpiYmLq6uszMzHZ2diH5BAEAAAAALAAAAACjABQAAAT+EMhJq7046827/2AIFItCEMpyiGzrvnB8NY00JJIi7zLC8DwGovWTHAQSHHApWjB7zpdgRREMCIFAwWA7aAfPpcKRJBSyp6fDjD4dCo/hpKGTWLFaLmDgLYApDH8WWAdye0phQAQVDFmJEo0BFAkBRxSLFYSGNxcGdRYCWXopj0AMRRORpaqXAXo5iHaiOVEWBWQYlAEMDZilOwNIgI6PrBMDWhQOrxO6vL4VCJIaC1kFhrmiCQsFSgkDCwYDNQANCw8PC9AxVMPTicYSWMwA7RTVWtgTCsgKwhhnCnQIhcJBADAPApBr5CDUhClA7EEiBo8igEbXKryrEBAGPnr+F6RNSyAglMAJrgwuIEfOQjgDMGPGfHBBwEl3q0TBJGAAFYWMLme1SNAzi8+QlSZVQoduAE1kaFrGsGkhHgcHA7Jq3foJJwegk4ruYiEAk4Es/5BCo7RuzgM8+lwgkHjR4hOrGOiWlXA2QFoPBP51zCANmsgKCRrQlGAw1oSXMmUutkDXGAIFDxowWPCXiN28gwQnA2EgVihXVQzIKVxBQYDJCxhQ+hcgrotgjCjiCEDmwVHPGzEsq1C6itANCQh4OfCJD5o/Dg6Q6ZVlHIUGV2DiwB4unNQYp5qxCZAGAFa+uFysOUNe0AUF3pRXau6l/a/7GxC4x6CgDt1SbeEoJ2ALD6SHwQDTGSDAd4loNuCDHm3wBwI94YdALRBmGIIPGmogBBMRAAA7"></embed>, where <embed src="data:image/gif;base64,R0lGODlhjQAVALMAAP///wAAAMzMzDIyMiIiIhAQEHZ2du7u7piYmKqqqtzc3FRUVERERGZmZoiIiLq6uiH5BAEAAAAALAAAAACNABUAAAT+EMhJq70Yi8w3/94ngmNpnoCzIKjKVkTjDIPTFJaLXgqD6TAZzYbbGSuIByCRMCWXzclDCWBEHUgl8yhBGAiX51ZKtUqwXO5hsr4cXuz4BF5QSKJyQHu+HynAFnt9dHZLaYcfDTsKRSgHiiZ/RowVAgMEAQE0AwUEBn1plpiaNAWZBhQOHqKZm6YBqHM+FKyknKdSaH6AALWuuLJhmRQJAXWIc8MTfwsUA0jKEswUC7oUCNEA0xPPEw4G4OG6ktfZ2xLVwgEVAwHNyADY67Td8XBd2b31AAQh5fMTLKXC84FcMoASBE7op64CgwC8EMmzwItBoYMU2SD8lzHgOxHjBvFt5KcRw0Rn7uDFU3ZgViwAjTDqcXnmoYOLMltKeCkhZoYHDQLczEkzhU2cIssRAJXmJIJZFHyunPf0hFOoFUY6UVZ1q7sFCwasyNAArNmzC3j+u4VVW0SRbK22MtV2IdMS8uJ6VWmSa9uQSePV5XAVw9IjhffytXDywEcJB6Q2fixiMgapih3L1YqhLNqzamVeZpxPMQfMeEun5qzyJAaL0Fh/cK2B8uYdvgYj8jWA4Bw4vH13uNSq9w/hI4IvXp5BJ3MO+55L52vA33QJD+5d334IEvdH3MMjehMewV3uEQAAOw=="></embed>.</p>
 <p>Now we use a different loss function for the model selection step.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.select</span>(Y,X, <span class="dt">loss =</span> <span class="st">&quot;lasso&quot;</span> )</code></pre></div>

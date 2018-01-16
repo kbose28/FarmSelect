@@ -25,7 +25,7 @@ A list with the following items
 \item{beta.chosen}{the indices of the covariates chosen in the model}
 \item{coef.chosen}{the coefficients of the chosen covariates}
 \item{X.res}{the decorrelated covariate matrix}
-\item{Y.res}{the decorrelated response vector}
+\item{Y.res}{the response vector corresponding to the decorrelated covariates}
 \item{nfactors}{number of (estimated) factors}
 }
 \description{
@@ -46,8 +46,8 @@ K = 3 #nfactors
 Q = 5 #model size
 Lambda = matrix(rnorm(P*K, 0,1), P,K)
 F = matrix(rnorm(N*K, 0,1), N,K)
-UU = matrix(rnorm(P*N, 0,1), P,N)
-X = Lambda\%*\%t(F)+UU
+U = matrix(rnorm(P*N, 0,1), P,N)
+X = Lambda\%*\%t(F)+U
 X = t(X)
 beta_1 = 3+3*runif(Q)
 beta = c(beta_1, rep(0,P-Q))
@@ -56,5 +56,5 @@ Y = X\%*\%beta+eps
 output = farm.select(Y,X)
 }
 \references{
-Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/pdf/1612.08490.pdf}
+Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/abs/1612.08490}
 }
