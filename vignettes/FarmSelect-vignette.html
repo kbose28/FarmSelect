@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Koushiki Bose" />
+
+<meta name="date" content="2018-01-16" />
+
+<title>Factor Adjusted Robust Model Selection</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Factor Adjusted Robust Model Selection</h1>
+<h4 class="author"><em>Koushiki Bose</em></h4>
+<h4 class="date"><em>2018-01-16</em></h4>
+
+
+
+<hr />
+<div id="goal-of-the-package" class="section level2">
+<h2>Goal of the package</h2>
+<p>This R package implements a consistent model selection strategy for high dimensional sparse regression when the covariate dependence can be reduced through factor models. By separating the latent factors from idiosyncratic components, the problem is transformed from model selection with highly correlated covariates to that with weakly correlated variables. It is appropriate for cases where we have many variables compared to the number of samples. Moreover, it implements a robust procedure to estimate distribution parameters wherever possible, hence being suitable for cases when the underlying distribution deviates from Gaussianity, which is commonly assumed in the literature. See the paper on this method, Fan et al.(2017) <a href="https://arxiv.org/abs/1612.08490" class="uri">https://arxiv.org/abs/1612.08490</a>, for detailed description of methods and further references.</p>
+<p>Let there be <span class="math inline">\(p\)</span> covariates and <span class="math inline">\(n\)</span> samples. Let us model the relationship between the response vector <span class="math inline">\(Y\)</span> and the covariates <span class="math inline">\(X\)</span> as <span class="math inline">\(Y = X\beta+\epsilon\)</span>. Here <span class="math inline">\(\beta\)</span> is a vector of size <span class="math inline">\(p\)</span>. Non-zero values in this vector <span class="math inline">\(\beta\)</span> denote which covariates truly belong in the model. For the covariates, assume the approximate factor model: <span class="math inline">\(X = FB^T+U\)</span>, where <span class="math inline">\(F\)</span> are the <span class="math inline">\(K\)</span> underlying factors, <span class="math inline">\(B\)</span> are the factor loadings and <span class="math inline">\(U\)</span> are the errors.</p>
+</div>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p>You can install FarmSelect from github with:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">install.packages</span>(<span class="st">&quot;devtools&quot;</span>)
+devtools::<span class="kw">install_github</span>(<span class="st">&quot;kbose28/FarmSelect&quot;</span>)
+<span class="kw">library</span>(FarmSelect)</code></pre></div>
+</div>
+<div id="getting-help" class="section level2">
+<h2>Getting help</h2>
+<ul>
+<li><p>Help on the functions can be accessed by typing “?”, followed by function name at the R command prompt.</p></li>
+<li><p>For up to date information, help with installation issues and questions/comments see the project page at <a href="https://kbose28.github.io/FarmSelect/" class="uri">https://kbose28.github.io/FarmSelect/</a>.</p></li>
+</ul>
+</div>
+<div id="functions" class="section level2">
+<h2>Functions</h2>
+<p>There are four functions available.</p>
+<ul>
+<li><code>farm.select</code>: The main function which carries out the entire model testing procedure.</li>
+<li><code>farm.adjust</code>: Adjusts the data for latent fators.</li>
+<li><code>farm.mean</code>: Multivariate mean estimation with Huber’s loss.</li>
+<li><code>farm.cov</code>: Multivariate covariance estimation with Huber’s loss.</li>
+</ul>
+<p>Also see the <a href="https://www.rdocumentation.org/packages/FarmTest/versions/1.0.0/topics/farm.scree"><code>farm.scree</code></a> function in the <a href="https://CRAN.R-project.org/package=FarmTest"><code>FarmTest</code></a> package for how to generate diagnostic plots and output to evaluate the factor adjustment step.</p>
+</div>
+<div id="main-function-example-model-selection" class="section level2">
+<h2>Main function example: model selection</h2>
+<p>Here we generate data from a factor model with 3 factors. We have 50 samples of 100 dimensional data. The model is of size 5, where the first 5 covariates model coefficients being non-zero and the rest zero. The factors, loadings, errors are all generated from a normal distribution.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(FarmSelect)
+<span class="kw">set.seed</span>(<span class="dv">100</span>)
+P =<span class="st"> </span><span class="dv">100</span> <span class="co">#dimension</span>
+N =<span class="st"> </span><span class="dv">50</span> <span class="co">#samples</span>
+K =<span class="st"> </span><span class="dv">3</span> <span class="co">#nfactors</span>
+Q =<span class="st"> </span><span class="dv">5</span> <span class="co">#model size</span>
+Lambda =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(P*K, <span class="dv">0</span>,<span class="dv">1</span>), P,K)
+F =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(N*K, <span class="dv">0</span>,<span class="dv">1</span>), N,K)
+U =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(P*N, <span class="dv">0</span>,<span class="dv">1</span>), P,N)
+X =<span class="st"> </span>Lambda%*%<span class="kw">t</span>(F)+U
+X =<span class="st"> </span><span class="kw">t</span>(X)
+beta_1 =<span class="st"> </span><span class="dv">3+3</span>*<span class="kw">runif</span>(Q)
+beta =<span class="st"> </span><span class="kw">c</span>(beta_1, <span class="kw">rep</span>(<span class="dv">0</span>,P-Q))
+eps =<span class="st"> </span><span class="kw">rnorm</span>(N)
+Y =<span class="st"> </span>X%*%beta+eps 
+output =<span class="st"> </span><span class="kw">farm.select</span>(Y,X)</code></pre></div>
+<pre><code>## Call:
+## farm.select(Y = Y, X = X)
+## 
+##  Factor Adjusted Robust Model Selection 
+## loss function used: mcp
+## 
+## p = 100, n = 50
+## factors found: 3
+## size of model selected:
+##  5</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(output)</code></pre></div>
+<pre><code>## [1] &quot;beta.chosen&quot; &quot;coef.chosen&quot; &quot;nfactors&quot;    &quot;X.res&quot;       &quot;Y.res&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output$beta.chosen</code></pre></div>
+<pre><code>## V1 V2 V3 V4 V5 
+##  1  2  3  4  5</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output$coef.chosen</code></pre></div>
+<pre><code>##       V1       V2       V3       V4       V5 
+## 3.706534 3.498892 4.566415 3.725966 3.297019</code></pre>
+<p>The values X.res and Y.res are the covariates and responses after adjusting for latent factors. The formulas for these are <span class="math inline">\(Y.\text{res} = (I_n-P)Y\)</span> and <span class="math inline">\(X.\text{res} = (I_n-P)X^T\)</span>, where <span class="math inline">\(P = \hat{F}(\hat{F}^T\hat{F})^{-1}\hat{F}^T\)</span>.</p>
+<p>Now we use a different loss function for the model selection step.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.select</span>(Y,X, <span class="dt">loss =</span> <span class="st">&quot;lasso&quot;</span> )</code></pre></div>
+<pre><code>## Call:
+## farm.select(Y = Y, X = X, loss = &quot;lasso&quot;)
+## 
+##  Factor Adjusted Robust Model Selection 
+## loss function used: lasso
+## 
+## p = 100, n = 50
+## factors found: 3
+## size of model selected:
+##  5</code></pre>
+<p>We may also use robust estimates of all the parameters. This may take more time, depending upon the dimension size of the problem.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.select</span>(Y,X, <span class="dt">robust =</span> <span class="ot">TRUE</span> )</code></pre></div>
+<pre><code>## Call:
+## farm.select(Y = Y, X = X, robust = TRUE)
+## 
+##  Factor Adjusted Robust Model Selection 
+## loss function used: mcp
+## 
+## p = 100, n = 50
+## factors found: 3
+## size of model selected:
+##  5</code></pre>
+</div>
+<div id="other-functions" class="section level2">
+<h2>Other functions</h2>
+<p>The function <code>farm.adjust</code> adjusts the dataset for latent factors. The number of factors is estimated internally by using the method in <span class="citation">(Ahn and Horenstein 2013)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.adjust</span>(Y,X)
+<span class="kw">names</span>(output)</code></pre></div>
+<pre><code>## [1] &quot;X.res&quot;    &quot;nfactors&quot; &quot;Y.res&quot;</code></pre>
+<p>If known, we can provide this function (or the main function) the number of latent factors. Providing too large a number results in a warning message. The maximum number of factors possible is <span class="math inline">\(\max(n,p)\)</span> but a much smaller number is recommended.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.adjust</span>(Y,X, <span class="dt">K.factors  =</span> <span class="dv">30</span>)</code></pre></div>
+<pre><code>## Warning in farm.adjust(Y, X, K.factors = 30): Number of factors supplied is
+## &gt; min(n,p)/2. May cause numerical inconsistencies</code></pre>
+<p>We see a warning telling us that it is not a good idea to calculate 30 eigenvalues from a dataset that has only 50 samples.</p>
+</div>
+<div id="notes" class="section level2">
+<h2>Notes</h2>
+<ol style="list-style-type: decimal">
+<li><p>Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.</p></li>
+<li><p>The covariates do not need to be de-meaned before insertion into the function, this is done internally.</p></li>
+</ol>
+<div id="refs" class="references">
+<div id="ref-ah2013">
+<p>Ahn, SC, and AR Horenstein. 2013. “Eigenvalue Ratio Test for the Number of Factors.” Econometrica.</p>
+</div>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
