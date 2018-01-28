@@ -27,15 +27,5 @@ output$beta.chosen
 output$coef.chosen
 
 ## ------------------------------------------------------------------------
-output = farm.select(Y,X, loss = "lasso" )
-
-## ------------------------------------------------------------------------
-output = farm.select(Y,X, robust = TRUE )
-
-## ------------------------------------------------------------------------
-output = farm.adjust(Y,X)
-names(output)
-
-## ------------------------------------------------------------------------
-output = farm.adjust(Y,X, K.factors  = 30)
+output = farm.select(Y,X, loss = "scad", K.factors = 10)
 

@@ -41,12 +41,24 @@ Find_factors <- function(Sigma, X, N, P, K) {
     .Call('_FarmSelect_Find_factors', PACKAGE = 'FarmSelect', Sigma, X, N, P, K)
 }
 
-Find_Y_star <- function(P_F, Y) {
-    .Call('_FarmSelect_Find_Y_star', PACKAGE = 'FarmSelect', P_F, Y)
+Find_lambda_class <- function(Sigma, X, N, P, K) {
+    .Call('_FarmSelect_Find_lambda_class', PACKAGE = 'FarmSelect', Sigma, X, N, P, K)
+}
+
+Find_factors_class <- function(Lambda_hat, X, N, P, K) {
+    .Call('_FarmSelect_Find_factors_class', PACKAGE = 'FarmSelect', Lambda_hat, X, N, P, K)
+}
+
+Find_X_star_class <- function(F_hat, Lambda_hat, X) {
+    .Call('_FarmSelect_Find_X_star_class', PACKAGE = 'FarmSelect', F_hat, Lambda_hat, X)
 }
 
 Find_X_star <- function(P_F, X) {
     .Call('_FarmSelect_Find_X_star', PACKAGE = 'FarmSelect', P_F, X)
+}
+
+Find_Y_star <- function(P_F, Y) {
+    .Call('_FarmSelect_Find_Y_star', PACKAGE = 'FarmSelect', P_F, Y)
 }
 
 Eigen_Decomp <- function(M) {

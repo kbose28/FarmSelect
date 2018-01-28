@@ -5,7 +5,8 @@
 \title{Factor-adjusted robust model selection}
 \usage{
 farm.select(Y, X, loss = c("mcp", "scad", "lasso"), verbose = TRUE,
-  robust = FALSE, ...)
+  robust = FALSE, lin.reg = TRUE, K.factors = NULL, max.iter = 1000,
+  nfolds = 10)
 }
 \arguments{
 \item{Y}{a size n outcome vector.}
@@ -18,14 +19,20 @@ farm.select(Y, X, loss = c("mcp", "scad", "lasso"), verbose = TRUE,
 
 \item{robust}{an \emph{optional} boolean, specifying whether or not to use robust estimators for mean and variance. Default is FALSE.}
 
-\item{\dots}{Arguments passed to the \code{\link{farm.adjust}} function.}
+\item{lin.reg}{an \emph{optional} boolean, specifying whether or not to assume that we have a linear regression model (TRUE) or a logit model (FALSE) structure. Default is TRUE.}
+
+\item{K.factors}{a \emph{optional} number of factors to be estimated. Otherwise estimated internally.}
+
+\item{max.iter}{The maximum number of passes over the data for each value of regularization parameter for model fitting. Default \code{10^3}.}
+
+\item{nfolds}{The number of cross-validation folds. Default is 10.}
 }
 \value{
 A list with the following items
+\item{model.size}{the size of the model}
 \item{beta.chosen}{the indices of the covariates chosen in the model}
 \item{coef.chosen}{the coefficients of the chosen covariates}
-\item{X.res}{the decorrelated covariate matrix}
-\item{Y.res}{the response vector corresponding to the decorrelated covariates}
+\item{X.res}{the residual covariate matrix after adjusting for factors}
 \item{nfactors}{number of (estimated) factors}
 }
 \description{
@@ -36,7 +43,7 @@ Number of rows and columns of the covariate matrix must be at least 4 in order t
 
 For details about the method, see Fan et al.(2017).
 
-For formula of how the covariates and the repsonse vector are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
+For formula of how the covariates are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
 }
 \examples{
 set.seed(100)
@@ -53,7 +60,18 @@ beta_1 = 3+3*runif(Q)
 beta = c(beta_1, rep(0,P-Q))
 eps = rnorm(N)
 Y = X\%*\%beta+eps
+
+##with default options
 output = farm.select(Y,X)
+
+##changing the loss function and inputting factors
+output = farm.select(Y,X, loss = "scad", K.factors = 10)
+
+##use a logistic regression model
+Prob = 1/(1+exp(-X\%*\%beta))
+Y = rbinom(N, 1, Prob)
+output = farm.select(Y,X, lin.reg=FALSE, loss="lasso")
+
 }
 \references{
 Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/abs/1612.08490}

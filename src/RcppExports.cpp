@@ -140,15 +140,46 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// Find_Y_star
-arma::mat Find_Y_star(arma::mat P_F, arma::mat Y);
-RcppExport SEXP _FarmSelect_Find_Y_star(SEXP P_FSEXP, SEXP YSEXP) {
+// Find_lambda_class
+arma::mat Find_lambda_class(arma::mat Sigma, arma::mat X, int N, int P, int K);
+RcppExport SEXP _FarmSelect_Find_lambda_class(SEXP SigmaSEXP, SEXP XSEXP, SEXP NSEXP, SEXP PSEXP, SEXP KSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type P_F(P_FSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type Y(YSEXP);
-    rcpp_result_gen = Rcpp::wrap(Find_Y_star(P_F, Y));
+    Rcpp::traits::input_parameter< arma::mat >::type Sigma(SigmaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type P(PSEXP);
+    Rcpp::traits::input_parameter< int >::type K(KSEXP);
+    rcpp_result_gen = Rcpp::wrap(Find_lambda_class(Sigma, X, N, P, K));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Find_factors_class
+arma::mat Find_factors_class(arma::mat Lambda_hat, arma::mat X, int N, int P, int K);
+RcppExport SEXP _FarmSelect_Find_factors_class(SEXP Lambda_hatSEXP, SEXP XSEXP, SEXP NSEXP, SEXP PSEXP, SEXP KSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type Lambda_hat(Lambda_hatSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    Rcpp::traits::input_parameter< int >::type P(PSEXP);
+    Rcpp::traits::input_parameter< int >::type K(KSEXP);
+    rcpp_result_gen = Rcpp::wrap(Find_factors_class(Lambda_hat, X, N, P, K));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Find_X_star_class
+arma::mat Find_X_star_class(arma::mat F_hat, arma::mat Lambda_hat, arma::mat X);
+RcppExport SEXP _FarmSelect_Find_X_star_class(SEXP F_hatSEXP, SEXP Lambda_hatSEXP, SEXP XSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type F_hat(F_hatSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Lambda_hat(Lambda_hatSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    rcpp_result_gen = Rcpp::wrap(Find_X_star_class(F_hat, Lambda_hat, X));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -161,6 +192,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type P_F(P_FSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
     rcpp_result_gen = Rcpp::wrap(Find_X_star(P_F, X));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Find_Y_star
+arma::mat Find_Y_star(arma::mat P_F, arma::mat Y);
+RcppExport SEXP _FarmSelect_Find_Y_star(SEXP P_FSEXP, SEXP YSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type P_F(P_FSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type Y(YSEXP);
+    rcpp_result_gen = Rcpp::wrap(Find_Y_star(P_F, Y));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -187,8 +230,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_FarmSelect_mu_robust_F", (DL_FUNC) &_FarmSelect_mu_robust_F, 2},
     {"_FarmSelect_Cov_Huber", (DL_FUNC) &_FarmSelect_Cov_Huber, 2},
     {"_FarmSelect_Find_factors", (DL_FUNC) &_FarmSelect_Find_factors, 5},
-    {"_FarmSelect_Find_Y_star", (DL_FUNC) &_FarmSelect_Find_Y_star, 2},
+    {"_FarmSelect_Find_lambda_class", (DL_FUNC) &_FarmSelect_Find_lambda_class, 5},
+    {"_FarmSelect_Find_factors_class", (DL_FUNC) &_FarmSelect_Find_factors_class, 5},
+    {"_FarmSelect_Find_X_star_class", (DL_FUNC) &_FarmSelect_Find_X_star_class, 3},
     {"_FarmSelect_Find_X_star", (DL_FUNC) &_FarmSelect_Find_X_star, 2},
+    {"_FarmSelect_Find_Y_star", (DL_FUNC) &_FarmSelect_Find_Y_star, 2},
     {"_FarmSelect_Eigen_Decomp", (DL_FUNC) &_FarmSelect_Eigen_Decomp, 1},
     {NULL, NULL, 0}
 };

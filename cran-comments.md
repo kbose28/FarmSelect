@@ -11,8 +11,17 @@ Test environments
 R CMD check results
 -------------------
 
--There were NO ERRORs or WARNINGs. -1 NOTE Possibly mis-spelled words in
-DESCRIPTION: Gaussianity (5:626) al (5:688) arXiv (5:699) et (5:685)
+-There were NO ERRORs or WARNINGs.
 
-These words are spelled correctly. \#\# Downstream dependencies There
-are currently no downstream dependencies for this package
+-1 NOTE
+
+Possibly mis-spelled words in DESCRIPTION:
+
+Gaussianity (5:626) al (5:688) arXiv (5:699) et (5:685)
+
+These words are spelled correctly.
+
+Downstream dependencies
+-----------------------
+
+There are currently no downstream dependencies for this package

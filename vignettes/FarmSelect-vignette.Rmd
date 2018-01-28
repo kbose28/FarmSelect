@@ -54,12 +54,10 @@ library(FarmSelect)
 
 ##Functions
 
-There are four functions available. 
+There are two functions available. 
 
 * `farm.select`: The main function which carries out the entire model testing procedure.
-* `farm.adjust`: Adjusts the data for latent fators.
-* `farm.mean`: Multivariate mean estimation with Huber's loss.
-* `farm.cov`: Multivariate covariance estimation with Huber's loss. 
+* `farm.res`: Adjusts the data for latent fators.
 
 Also see the [`farm.scree`](https://www.rdocumentation.org/packages/FarmTest/versions/1.0.0/topics/farm.scree) function in the [`FarmTest`](https://CRAN.R-project.org/package=FarmTest)
  package for how to generate diagnostic plots and output to evaluate the factor adjustment step.
@@ -91,29 +89,34 @@ names(output)
 output$beta.chosen
 output$coef.chosen
 ```
-The values X.res and Y.res are the covariates and responses after adjusting for latent factors. The formulas for these are $Y.\text{res} = (I_n-P)Y$ and $X.\text{res} = (I_n-P)X^T$, where $P = \hat{F}(\hat{F}^T\hat{F})^{-1}\hat{F}^T$.
+The values X.res is the residual covariate matrix after adjusting for factors. 
 
-Now we use a different loss function for the model selection step. 
+Now we use a different loss function for the model selection step, along with changing the number of factors.
 ```{r}
-output = farm.select(Y,X, loss = "lasso" )
+output = farm.select(Y,X, loss = "scad", K.factors = 10)
 ```
 We may also use robust estimates of all the parameters. This may take more time, depending upon the dimension size of the problem. 
 ```{r}
 output = farm.select(Y,X, robust = TRUE )
 ```
-
-##Other functions
-
-The function ``farm.adjust`` adjusts the dataset for latent factors. The number of factors is estimated internally by using the method in [@ah2013].
+For a logistic regression, we do the following: 
 ```{r}
-output = farm.adjust(Y,X)
+Prob = 1/(1+exp(-X%*%beta))
+Y = rbinom(N, 1, Prob)
+output = farm.select(Y,X, lin.reg=FALSE, loss = "lasso")
+```
+The function ``farm.res`` adjusts the dataset for latent factors. The number of factors is estimated internally by using the method in [@ah2013].
+```{r}
+output = farm.res(X)
 names(output)
 ```
 If known, we can provide this function (or the main function) the number of latent factors. Providing too large a number results in a warning message. The maximum number of factors possible is $\max(n,p)$ but a much smaller number is recommended. 
 ```{r}
-output = farm.adjust(Y,X, K.factors  = 30)
+output = farm.res(X, K.factors  = 30)
 ```
 We see a warning telling us that it is not a good idea to calculate 30 eigenvalues from a dataset that has only 50 samples. 
+
+
 
 ## Notes 
 

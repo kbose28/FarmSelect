@@ -24,7 +24,7 @@ arma::mat randt(int M, int N, int K)
     for(j=0; j<N; j++){
       X=randn(K+1);
       v1=mean(X);  v2=var(X);
-      T(i,j)=sqrt(K+1)*v1/v2;
+      T(i,j)=sqrt(static_cast<double>(K+1))*v1/v2;
     }
   }
 
@@ -39,7 +39,7 @@ arma::vec Fourier_basis(float z, int n)
   int i;
   float v1,v2;
   float w=0.04;
-  v1=sqrt(2); v2=1.0*z*3.1415926*w;//v2=1.0*datum::pi*z;
+  v1=sqrt(static_cast<double>(2)); v2=1.0*z*3.1415926*w;//v2=1.0*datum::pi*z;
   vec cita; cita.zeros(n);
   for(i=1;i<=n-1;i++){
     if(i%2==0)cita(i)=v1*cos(i*v2);
@@ -116,7 +116,7 @@ arma::mat Huber_descent (arma::mat X, arma::mat phi, arma::mat B, float CT)
   for(k=1; k<500; k++){
     v1= as_scalar(Huber_loss (X, phi, b_1, CT, T));
     test=Huber_gradient (X, phi, b_1, CT, T);
-    b_2=b_1;      b_1-=0.5* test/sqrt(k);
+    b_2=b_1;      b_1-=0.5* test/sqrt(static_cast<double>(k));
     v2=as_scalar(Huber_loss (X, phi, b_1, CT, T));
     //printf("\n %dth v1=%f    v2=%f   \n", k, v1, v2);
     if(fabs(v1-v2)<1.0e-10 || v1<v2+1.0e-8)k=500;
@@ -299,7 +299,7 @@ arma::mat Find_factors (arma::mat Sigma, arma::mat X, int N, int P, int K)
   eig_sym(eigval_cov, eigvec_cov, Sigma);
   eigval_cov=sort(eigval_cov,"descend");
   eigvec_cov=fliplr(eigvec_cov);
-  Lambda_hat=eigvec_cov.cols(0,K-1)* sqrt(P);
+  Lambda_hat=eigvec_cov.cols(0,K-1)* sqrt(static_cast<double>(P));
 
   //Estimate Factors
   F_hat=X.t()*Lambda_hat/P;
@@ -311,14 +311,50 @@ arma::mat Find_factors (arma::mat Sigma, arma::mat X, int N, int P, int K)
   return P_F;
 }
 
+
 // [[Rcpp::export]]
-arma::mat Find_Y_star (arma::mat P_F,arma::mat Y)
-  {   using namespace arma;
-  mat Y_star;
-  //Y_star=Y;
-  Y_star=P_F*Y;
-  return Y_star;
+arma::mat Find_lambda_class (arma::mat Sigma, arma::mat X, int N, int P, int K)
+{
+  using namespace arma;
+
+
+  //mat XX;             XX.zeros(N, N);
+  vec eigval_cov;     eigval_cov.zeros(N);
+  mat eigvec_cov;     eigvec_cov.zeros(N,N);
+  mat Lambda_hat;     Lambda_hat.zeros(P,K);
+
+
+  //PCA on XPX, eatimate loadings by the first K eigenvectors
+  //XX= X *  X.t();
+
+  eig_sym(eigval_cov, eigvec_cov, Sigma);
+  eigval_cov=sort(eigval_cov,"descend");
+  eigvec_cov=fliplr(eigvec_cov);
+  Lambda_hat=eigvec_cov.cols(0,K-1)* sqrt(static_cast<double>(P));
+  return Lambda_hat;
 }
+
+// [[Rcpp::export]]
+arma::mat Find_factors_class (arma::mat Lambda_hat, arma::mat X, int N, int P, int K)
+{
+  using namespace arma;
+  //Estimate Factors
+  mat F_hat;          F_hat.zeros(N,K);
+  F_hat=X.t()*Lambda_hat/P;
+  return F_hat;
+}
+
+// [[Rcpp::export]]
+arma::mat Find_X_star_class (arma::mat F_hat,arma::mat Lambda_hat,  arma::mat X)
+{
+  using namespace arma;
+  mat U_star;
+  U_star= (X-Lambda_hat*F_hat.t());
+  mat UT;      UT=U_star.t();
+  return UT;
+
+}
+
 
 
 //Find factors
@@ -331,6 +367,16 @@ arma::mat Find_X_star(arma::mat P_F, arma::mat X)
   return UT;
 }
 
+
+
+// [[Rcpp::export]]
+arma::mat Find_Y_star (arma::mat P_F,arma::mat Y)
+{   using namespace arma;
+  mat Y_star;
+  //Y_star=Y;
+  Y_star=P_F*Y;
+  return Y_star;
+}
 
 //Input:  Covariance matrix M
 //Output: all
