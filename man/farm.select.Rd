@@ -23,7 +23,7 @@ farm.select(Y, X, loss = c("mcp", "scad", "lasso"), verbose = TRUE,
 
 \item{K.factors}{a \emph{optional} number of factors to be estimated. Otherwise estimated internally.}
 
-\item{max.iter}{Maximum number of iterations for across the regularization path. Default is 10000.}
+\item{max.iter}{Maximum number of iterations across the regularization path. Default is 10000.}
 
 \item{nfolds}{The number of cross-validation folds. Default is ceiling(samplesize/3).}
 }
@@ -32,7 +32,7 @@ A list with the following items
 \item{model.size}{the size of the model}
 \item{beta.chosen}{the indices of the covariates chosen in the model}
 \item{coef.chosen}{the coefficients of the chosen covariates}
-\item{X.res}{the residual covariate matrix after adjusting for factors}
+\item{X.residual}{the residual covariate matrix after adjusting for factors}
 \item{nfactors}{number of (estimated) factors}
 }
 \description{

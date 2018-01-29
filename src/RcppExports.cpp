@@ -140,6 +140,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// Find_PF
+arma::mat Find_PF(arma::mat F_hat, int N);
+RcppExport SEXP _FarmSelect_Find_PF(SEXP F_hatSEXP, SEXP NSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type F_hat(F_hatSEXP);
+    Rcpp::traits::input_parameter< int >::type N(NSEXP);
+    rcpp_result_gen = Rcpp::wrap(Find_PF(F_hat, N));
+    return rcpp_result_gen;
+END_RCPP
+}
 // Find_lambda_class
 arma::mat Find_lambda_class(arma::mat Sigma, arma::mat X, int N, int P, int K);
 RcppExport SEXP _FarmSelect_Find_lambda_class(SEXP SigmaSEXP, SEXP XSEXP, SEXP NSEXP, SEXP PSEXP, SEXP KSEXP) {
@@ -230,6 +242,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_FarmSelect_mu_robust_F", (DL_FUNC) &_FarmSelect_mu_robust_F, 2},
     {"_FarmSelect_Cov_Huber", (DL_FUNC) &_FarmSelect_Cov_Huber, 2},
     {"_FarmSelect_Find_factors", (DL_FUNC) &_FarmSelect_Find_factors, 5},
+    {"_FarmSelect_Find_PF", (DL_FUNC) &_FarmSelect_Find_PF, 2},
     {"_FarmSelect_Find_lambda_class", (DL_FUNC) &_FarmSelect_Find_lambda_class, 5},
     {"_FarmSelect_Find_factors_class", (DL_FUNC) &_FarmSelect_Find_factors_class, 5},
     {"_FarmSelect_Find_X_star_class", (DL_FUNC) &_FarmSelect_Find_X_star_class, 3},

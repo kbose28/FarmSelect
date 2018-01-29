@@ -312,6 +312,20 @@ arma::mat Find_factors (arma::mat Sigma, arma::mat X, int N, int P, int K)
 }
 
 
+
+// [[Rcpp::export]]
+arma::mat Find_PF(arma::mat F_hat, int N)
+{
+  using namespace arma;
+
+  //Generate X_star
+  mat I_n;  I_n.eye(N,N);
+  mat P_F; P_F=F_hat.t()*F_hat;
+  P_F=I_n-F_hat*P_F.i()*F_hat.t();
+  return P_F;
+}
+
+
 // [[Rcpp::export]]
 arma::mat Find_lambda_class (arma::mat Sigma, arma::mat X, int N, int P, int K)
 {

@@ -41,6 +41,10 @@ Find_factors <- function(Sigma, X, N, P, K) {
     .Call('_FarmSelect_Find_factors', PACKAGE = 'FarmSelect', Sigma, X, N, P, K)
 }
 
+Find_PF <- function(F_hat, N) {
+    .Call('_FarmSelect_Find_PF', PACKAGE = 'FarmSelect', F_hat, N)
+}
+
 Find_lambda_class <- function(Sigma, X, N, P, K) {
     .Call('_FarmSelect_Find_lambda_class', PACKAGE = 'FarmSelect', Sigma, X, N, P, K)
 }

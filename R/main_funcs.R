@@ -21,13 +21,13 @@ NULL
 #' @param robust a boolean, specifying whether or not to use robust estimators for mean and variance. Default is FALSE.
 #' @param lin.reg a boolean, specifying whether or not to assume that we have a linear regression model (TRUE) or a logit model (FALSE) structure. Default is TRUE.
 #' @param K.factors a \emph{optional} number of factors to be estimated. Otherwise estimated internally.
-#' @param max.iter Maximum number of iterations for across the regularization path. Default is 10000.
+#' @param max.iter Maximum number of iterations across the regularization path. Default is 10000.
 #' @param nfolds The number of cross-validation folds. Default is ceiling(samplesize/3).
 #' @return A list with the following items
 #' \item{model.size}{the size of the model}
 #' \item{beta.chosen}{the indices of the covariates chosen in the model}
 #' \item{coef.chosen}{the coefficients of the chosen covariates}
-#' \item{X.res}{the residual covariate matrix after adjusting for factors}
+#' \item{X.residual}{the residual covariate matrix after adjusting for factors}
 #' \item{nfactors}{number of (estimated) factors}
 #' @details Number of rows and columns of the covariate matrix must be at least 4 in order to be able to calculate latent factors.
 #' @details For details about the method, see Fan et al.(2017).
@@ -109,7 +109,7 @@ farm.select.adjusted <- function (Y, X,   loss,robust ,lin.reg,K.factors, max.it
   nfactors = output.adjust$nfactors
   nx = NROW(X.res)
   p = NCOL(X.res)
-
+  X.residual = output.adjust$X.residual
   #perform model selection
   if(lin.reg){
    output.chosen = farm.select.temp ( X.res, Y.res, loss,max.iter, nfolds)
@@ -118,9 +118,8 @@ farm.select.adjusted <- function (Y, X,   loss,robust ,lin.reg,K.factors, max.it
     output.chosen = farm.select.temp ( X.res, Y.res, loss,max.iter, nfolds, factors = F_hat)
   }
 
-
   #list all the output
-  list(model.size = output.chosen$model_size, beta.chosen = output.chosen$beta_chosen, coef.chosen = output.chosen$coef_chosen, nfactors = nfactors, X.res = X.res)
+  list(model.size = output.chosen$model_size, beta.chosen = output.chosen$beta_chosen, coef.chosen = output.chosen$coef_chosen, nfactors = nfactors, X.residual =X.residual)
 }
 #
 
@@ -161,19 +160,16 @@ farm.adjust<- function(Y , X , robust , lin.reg,K.factors ) {#, robust.cov = FAL
   if(K.factors>max(n,p)) stop('\n Number of factors cannot be larger than n or p \n')
 
   #using K.factors estimate the factors and loadings
+  Lambda_hat = Find_lambda_class(Sigma = matrix(covx,p,p), (X), n, p,  K.factors)
+  F_hat = Find_factors_class(Lambda_hat, (X), n, p,  K.factors)
+  X.res2 = Find_X_star_class(F_hat,Lambda_hat, X )
+
   if(lin.reg){
-    P_F = Find_factors( Sigma = matrix(covx,p,p), (X), n, p,  K.factors)
-    X.res = Find_X_star (P_F, X)
-  }else{
-    Lambda_hat = Find_lambda_class(Sigma = matrix(covx,p,p), (X), n, p,  K.factors)
-    F_hat = Find_factors_class(Lambda_hat, (X), n, p,  K.factors)
-    X.res = Find_X_star_class(F_hat,Lambda_hat, X )
+    P_F = Find_PF( F_hat,  n)
+    X.res1 = Find_X_star( P_F, X)
   }
 
-  #output
-  if(is.null(Y)){
-  list(X.res = X.res, nfactors = K.factors)
-  }else {
+
     if(NCOL(X)!=NROW(Y)) stop('\n number of rows in covariate matrix should be size of the outcome vector \n')
     if(abs(mean(Y))>0.00000001){
       if(robust ==TRUE){
@@ -184,17 +180,15 @@ farm.adjust<- function(Y , X , robust , lin.reg,K.factors ) {#, robust.cov = FAL
       }
     }
     if(lin.reg){
-      Y.res = Find_Y_star( P_F, matrix(Y,n,1))
+      Y.res1 = Find_Y_star( P_F, matrix(Y,n,1))
     }else{
-      Y.res = matrix(Y,n,1)
+      Y.res2 = matrix(Y,n,1)
     }
     if(lin.reg){
-      list(X.res = X.res,Y.res = Y.res,  nfactors = K.factors)
+      list(X.res = X.res1,Y.res = Y.res1,  nfactors = K.factors, X.residual = X.res2)
     }else{
-      list(X.res = X.res,Y.res = Y.res,  nfactors = K.factors, F_hat = F_hat)
+      list(X.res = X.res2,Y.res = Y.res2,  nfactors = K.factors, F_hat = F_hat,X.residual = X.res2)
     }
-
-  }
 }
 #model selection: not for end user
 farm.select.temp<- function(X.res, Y.res,loss, max.iter, nfolds ,factors = NULL)
