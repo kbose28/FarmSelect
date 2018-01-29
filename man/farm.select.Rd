@@ -5,8 +5,8 @@
 \title{Factor-adjusted robust model selection}
 \usage{
 farm.select(Y, X, loss = c("mcp", "scad", "lasso"), verbose = TRUE,
-  robust = FALSE, lin.reg = TRUE, K.factors = NULL, max.iter = 1000,
-  nfolds = 10)
+  robust = FALSE, lin.reg = TRUE, K.factors = NULL, max.iter = 10000,
+  nfolds = ceiling(length(Y)/3))
 }
 \arguments{
 \item{Y}{a size n outcome vector.}
@@ -15,17 +15,17 @@ farm.select(Y, X, loss = c("mcp", "scad", "lasso"), verbose = TRUE,
 
 \item{loss}{an \emph{optional} character string specifying the loss function to be minimized. Must be one of "mcp" (default), "scad" or "lasso". You can just specify the initial letter.}
 
-\item{verbose}{an \emph{optional} boolean determining whether or not to print output to the console. Default is TRUE.}
+\item{verbose}{a boolean determining whether or not to print output to the console. Default is TRUE.}
 
-\item{robust}{an \emph{optional} boolean, specifying whether or not to use robust estimators for mean and variance. Default is FALSE.}
+\item{robust}{a boolean, specifying whether or not to use robust estimators for mean and variance. Default is FALSE.}
 
-\item{lin.reg}{an \emph{optional} boolean, specifying whether or not to assume that we have a linear regression model (TRUE) or a logit model (FALSE) structure. Default is TRUE.}
+\item{lin.reg}{a boolean, specifying whether or not to assume that we have a linear regression model (TRUE) or a logit model (FALSE) structure. Default is TRUE.}
 
 \item{K.factors}{a \emph{optional} number of factors to be estimated. Otherwise estimated internally.}
 
-\item{max.iter}{The maximum number of passes over the data for each value of regularization parameter for model fitting. Default \code{10^3}.}
+\item{max.iter}{Maximum number of iterations for across the regularization path. Default is 10000.}
 
-\item{nfolds}{The number of cross-validation folds. Default is 10.}
+\item{nfolds}{The number of cross-validation folds. Default is ceiling(samplesize/3).}
 }
 \value{
 A list with the following items
@@ -65,12 +65,12 @@ Y = X\%*\%beta+eps
 output = farm.select(Y,X)
 
 ##changing the loss function and inputting factors
-output = farm.select(Y,X, loss = "scad", K.factors = 10)
+output = farm.select(Y,X, loss = "lasso", K.factors = 3)
 
 ##use a logistic regression model
 Prob = 1/(1+exp(-X\%*\%beta))
-Y = rbinom(N, 1, Prob)
-output = farm.select(Y,X, lin.reg=FALSE, loss="lasso")
+Y = rbinom(n, 1, Prob)
+output = farm.select(Y,X, lin.reg=FALSE)
 
 }
 \references{

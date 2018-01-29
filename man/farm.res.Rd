@@ -42,9 +42,8 @@ F = matrix(rnorm(N*K, 0,1), N,K)
 U = matrix(rnorm(P*N, 0,1), P,N)
 X = Lambda\%*\%t(F)+U
 X = t(X)
-output = farm.res(X) #default options
+output = farm.res(X)
 
-output = farm.res(X, K.factors = 1) #specify number of factors
 }
 \references{
 Ahn, S. C., and A. R. Horenstein (2013): "Eigenvalue Ratio Test for the Number of Factors," Econometrica, 81 (3), 1203–1227.
