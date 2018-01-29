@@ -42,7 +42,9 @@ F = matrix(rnorm(N*K, 0,1), N,K)
 U = matrix(rnorm(P*N, 0,1), P,N)
 X = Lambda\%*\%t(F)+U
 X = t(X)
-output = farm.res(X)
+output = farm.res(X) #default options
+output$nfactors
+output = farm.res(X, K.factors = 10) #inputting factors
 
 }
 \references{

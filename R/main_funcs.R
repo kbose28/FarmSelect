@@ -50,14 +50,16 @@ NULL
 #'
 #' ##with default options
 #' output = farm.select(Y,X)
+#' output$beta.chosen #variables selected
+#' output$coef.chosen #coefficients of selected variables
 #'
 #' ##changing the loss function and inputting factors
-#' output = farm.select(Y,X, loss = "lasso", K.factors = 3)
+#' output = farm.select(Y,X, loss = "scad", K.factors = 4)
 #'
 #' ##use a logistic regression model
 #' Prob = 1/(1+exp(-X%*%beta))
-#' Y = rbinom(n, 1, Prob)
-#' output = farm.select(Y,X, lin.reg=FALSE)
+#' Y = rbinom(N, 1, Prob)
+#' output = farm.select(Y,X, lin.reg=FALSE, loss = "lasso")
 #'
 #' @references Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/abs/1612.08490}
 #' @export
@@ -214,7 +216,7 @@ farm.select.temp<- function(X.res, Y.res,loss, max.iter, nfolds ,factors = NULL)
         }
       }
     else if (loss == "lasso"){
-      CV_lasso=cv.ncvreg(X.res, Y.res,penalty="lasso", seed = 100,nfolds = cnfolds, max.iter  = max.iter)
+      CV_lasso=cv.ncvreg(X.res, Y.res,penalty="lasso", seed = 100,nfolds = nfolds, max.iter  = max.iter)
       beta_lasso=coef(CV_lasso, s = "lambda.min", exact=TRUE)
       inds_lasso=which(beta_lasso!=0)
       if( length(inds_lasso)==1){
@@ -312,7 +314,9 @@ farm.select.temp<- function(X.res, Y.res,loss, max.iter, nfolds ,factors = NULL)
 #' U = matrix(rnorm(P*N, 0,1), P,N)
 #' X = Lambda%*%t(F)+U
 #' X = t(X)
-#' output = farm.res(X)
+#' output = farm.res(X) #default options
+#' output$nfactors
+#' output = farm.res(X, K.factors = 10) #inputting factors
 #'
 #' @references Ahn, S. C., and A. R. Horenstein (2013): "Eigenvalue Ratio Test for the Number of Factors," Econometrica, 81 (3), 1203–1227.
 #' @references Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/abs/1612.08490}
