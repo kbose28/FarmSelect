@@ -9,7 +9,7 @@ farm.res(X, K.factors = NULL, robust = FALSE)
 \arguments{
 \item{X}{an n x p data matrix with each row being a sample.}
 
-\item{K.factors}{a \emph{optional} number of factors to be estimated. Otherwise estimated internally.}
+\item{K.factors}{a \emph{optional} number of factors to be estimated. Otherwise estimated internally. K>0.}
 
 \item{robust}{an \emph{optional} boolean, specifying whether or not to use robust estimators for mean and variance. Default is FALSE.}
 }
@@ -45,7 +45,7 @@ X = t(X)
 output = farm.res(X) #default options
 output$nfactors
 output = farm.res(X, K.factors = 10) #inputting factors
-
+names(output) #list of output
 }
 \references{
 Ahn, S. C., and A. R. Horenstein (2013): "Eigenvalue Ratio Test for the Number of Factors," Econometrica, 81 (3), 1203–1227.

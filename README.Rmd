@@ -35,7 +35,7 @@ knitr::opts_chunk$set(
 This R package implements a consistent model selection strategy for high dimensional sparse regression when the covariate dependence can be reduced through factor models. By separating the latent factors from idiosyncratic components, the problem is transformed from model selection with highly correlated covariates to that with weakly correlated variables. It is appropriate for cases where we have many variables compared to the number of samples. Moreover, it implements a robust procedure to estimate distribution parameters wherever possible, hence being suitable for cases when the underlying distribution deviates from Gaussianity, which is commonly assumed in the literature. See the paper on this method, Fan et al.(2017) <https://arxiv.org/abs/1612.08490>, for detailed description of methods and further references. 
 
 Let there be $p$ covariates and $n$ samples. Let us model the relationship between the response vector $Y$ and the covariates $X$ as 
-![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BY%7D%20%3D%20%5Cmathbf%7BX%7D%5Cbm%7B%5Cbeta%7D%20&plus;%20%5Cepsilon). Here $\beta$ is a vector of size $p$. Non-zero values in this vector $\beta$ denote which covariates truly belong in the model. For the covariates, assume the approximate factor model: ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BX%7D%20%3D%20%5Cmathbf%7BFB%7D%5E%7BT%7D%20&plus;%20%5Cmathbf%7BU%7D), where $F$ are the $K$ underlying factors, $B$ are the factor loadings and $U$ are the errors. 
+![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BY%7D%20%3D%20%5Cmathbf%7BX%7D%5Cbm%7B%5Cbeta%7D%20&plus;%20%5Cepsilon). Here $\beta$ is a vector of size $p$. Non-zero values in this vector $\beta$ denote which covariates truly belong in the model. A logistic regression model is also supported in this package. For the covariates, assume the approximate factor model: ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BX%7D%20%3D%20%5Cmathbf%7BFB%7D%5E%7BT%7D%20&plus;%20%5Cmathbf%7BU%7D), where $F$ are the $K$ underlying factors, $B$ are the factor loadings and $U$ are the errors. 
 
 
 
@@ -81,7 +81,7 @@ Also see the [`farm.scree`](https://www.rdocumentation.org/packages/FarmTest/ver
 
 ## Main function example: model selection
 
-Here we generate data from a factor model with 3 factors. We have 50 samples of 100 dimensional data. The model is of size 5, where the first 5 covariates model coefficients being non-zero and the rest zero. The factors, loadings, errors are all generated from a normal distribution.
+Here we generate data from a factor model with 3 factors. We have 50 samples of 200 dimensional data. The model is of size 5, where the first 5 covariates model coefficients being non-zero and the rest zero. The factors, loadings, errors are all generated from a normal distribution.
 
 ```{r}
 library(FarmSelect)
@@ -112,12 +112,10 @@ Now we use a different loss function for the model selection step, along with ch
 ```{r}
 output = farm.select(Y,X, loss = "scad", K.factors = 10)
 ```
-We may also use robust estimates of all the parameters. This may take more time, depending upon the dimension size of the problem. 
-```{r}
-output = farm.select(Y,X, robust = TRUE )
-```
+
 For a logistic regression, we do the following: 
 ```{r}
+set.seed(100)
 Prob = 1/(1+exp(-X%*%beta))
 Y = rbinom(N, 1, Prob)
 output = farm.select(Y,X, lin.reg=FALSE, loss = "lasso")

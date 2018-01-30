@@ -20,7 +20,7 @@ NULL
 #' @param verbose a boolean determining whether or not to print output to the console. Default is TRUE.
 #' @param robust a boolean, specifying whether or not to use robust estimators for mean and variance. Default is FALSE.
 #' @param lin.reg a boolean, specifying whether or not to assume that we have a linear regression model (TRUE) or a logit model (FALSE) structure. Default is TRUE.
-#' @param K.factors a \emph{optional} number of factors to be estimated. Otherwise estimated internally.
+#' @param K.factors a \emph{optional} number of factors to be estimated. Otherwise estimated internally. K>0.
 #' @param max.iter Maximum number of iterations across the regularization path. Default is 10000.
 #' @param nfolds The number of cross-validation folds. Default is ceiling(samplesize/3).
 #' @return A list with the following items
@@ -195,6 +195,7 @@ farm.select.temp<- function(X.res, Y.res,loss, max.iter, nfolds ,factors = NULL)
 {
 
   N = length(Y.res)
+  P = NCOL(X.res)
   if(is.null(factors)){
     if (loss == "scad"){
       CV_SCAD=cv.ncvreg(X.res, Y.res,penalty="SCAD",seed = 100, nfolds = nfolds, max.iter  = max.iter)
@@ -237,7 +238,7 @@ farm.select.temp<- function(X.res, Y.res,loss, max.iter, nfolds ,factors = NULL)
     }else{
       Kfactors = NCOL(factors)
       if (loss == "scad"){
-        CV_SCAD=cv.ncvreg(cbind(factors,X.res), Y.res,penalty="SCAD",seed = 100, nfolds = nfolds, family = "binomial", max.iter  = max.iter)
+        CV_SCAD=cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="SCAD",seed = 100, nfolds = nfolds, family = "binomial", max.iter  = max.iter,penalty.factor = c(rep(0,Kfactors), rep(1, P)))
         beta_SCAD=coef(CV_SCAD, s = "lambda.min", exact=TRUE)
         beta_SCAD = beta_SCAD[-c(2:(Kfactors+1))]
         inds_SCAD=which(beta_SCAD!=0)
@@ -251,7 +252,7 @@ farm.select.temp<- function(X.res, Y.res,loss, max.iter, nfolds ,factors = NULL)
           }
         }
       else if (loss == "lasso"){
-        CV_lasso=cv.ncvreg(cbind(factors,X.res), Y.res,penalty="lasso", seed = 100,nfolds = nfolds, family = "binomial", max.iter  = max.iter)
+        CV_lasso=cv.ncvreg(X = cbind(factors,X.res), y= Y.res,penalty="lasso", seed = 100,nfolds = nfolds, family = "binomial", max.iter  = max.iter,penalty.factor = c(rep(0,Kfactors), rep(1, P)))
          beta_lasso=coef(CV_lasso, s = "lambda.min", exact=TRUE)
         beta_lasso = beta_lasso[-c(2:(Kfactors+1))]
         inds_lasso=which(beta_lasso!=0)
@@ -264,7 +265,7 @@ farm.select.temp<- function(X.res, Y.res,loss, max.iter, nfolds ,factors = NULL)
             list(beta_chosen= inds_lasso, coef_chosen=coef_chosen,model_size=length(inds_lasso) )
             }
         }else {
-          CV_MCP=cv.ncvreg(cbind(factors,X.res), Y.res,penalty="MCP",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter)
+          CV_MCP=cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="MCP",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter,penalty.factor = c(rep(0,Kfactors), rep(1, P)))
           beta_MCP=coef(CV_MCP, s = "lambda.min", exact=TRUE)
           beta_MCP = beta_MCP[-c(2:(Kfactors+1))]
           inds_MCP=which(beta_MCP!=0)
@@ -287,7 +288,7 @@ farm.select.temp<- function(X.res, Y.res,loss, max.iter, nfolds ,factors = NULL)
 #'
 #' Given a matrix of covariates, this function estimates the underlying factors and computes data residuals after regressing out those factors.
 #' @param X an n x p data matrix with each row being a sample.
-#' @param K.factors a \emph{optional} number of factors to be estimated. Otherwise estimated internally.
+#' @param K.factors a \emph{optional} number of factors to be estimated. Otherwise estimated internally. K>0.
 #' @param robust an \emph{optional} boolean, specifying whether or not to use robust estimators for mean and variance. Default is FALSE.
 #' @return A list with the following items
 #' \item{residual}{the data after being adjusted for underlying factors}
@@ -311,7 +312,7 @@ farm.select.temp<- function(X.res, Y.res,loss, max.iter, nfolds ,factors = NULL)
 #' output = farm.res(X) #default options
 #' output$nfactors
 #' output = farm.res(X, K.factors = 10) #inputting factors
-#'
+#' names(output) #list of output
 #' @references Ahn, S. C., and A. R. Horenstein (2013): "Eigenvalue Ratio Test for the Number of Factors," Econometrica, 81 (3), 1203–1227.
 #' @references Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/abs/1612.08490}
 #' @export

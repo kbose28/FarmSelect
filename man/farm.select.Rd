@@ -21,7 +21,7 @@ farm.select(Y, X, loss = c("mcp", "scad", "lasso"), verbose = TRUE,
 
 \item{lin.reg}{a boolean, specifying whether or not to assume that we have a linear regression model (TRUE) or a logit model (FALSE) structure. Default is TRUE.}
 
-\item{K.factors}{a \emph{optional} number of factors to be estimated. Otherwise estimated internally.}
+\item{K.factors}{a \emph{optional} number of factors to be estimated. Otherwise estimated internally. K>0.}
 
 \item{max.iter}{Maximum number of iterations across the regularization path. Default is 10000.}
 

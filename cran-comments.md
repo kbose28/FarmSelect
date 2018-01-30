@@ -1,5 +1,5 @@
-New Submission
---------------
+Update after fixing errors for Solaris
+--------------------------------------
 
 Test environments
 -----------------

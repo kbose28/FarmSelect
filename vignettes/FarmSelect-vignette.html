@@ -12,9 +12,9 @@
 
 <meta name="author" content="Koushiki Bose" />
 
-<meta name="date" content="2018-01-28" />
+<meta name="date" content="2018-01-30" />
 
-<title>Factor Adjusted Robust Model Selection</title>
+<title>FarmSelect: Factor Adjusted Robust Model Selection</title>
 
 
 
@@ -68,9 +68,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<h1 class="title toc-ignore">Factor Adjusted Robust Model Selection</h1>
+<h1 class="title toc-ignore">FarmSelect: Factor Adjusted Robust Model Selection</h1>
 <h4 class="author"><em>Koushiki Bose</em></h4>
-<h4 class="date"><em>2018-01-28</em></h4>
+<h4 class="date"><em>2018-01-30</em></h4>
 
 
 
@@ -78,7 +78,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="goal-of-the-package" class="section level2">
 <h2>Goal of the package</h2>
 <p>This R package implements a consistent model selection strategy for high dimensional sparse regression when the covariate dependence can be reduced through factor models. By separating the latent factors from idiosyncratic components, the problem is transformed from model selection with highly correlated covariates to that with weakly correlated variables. It is appropriate for cases where we have many variables compared to the number of samples. Moreover, it implements a robust procedure to estimate distribution parameters wherever possible, hence being suitable for cases when the underlying distribution deviates from Gaussianity, which is commonly assumed in the literature. See the paper on this method, Fan et al.(2017) <a href="https://arxiv.org/abs/1612.08490" class="uri">https://arxiv.org/abs/1612.08490</a>, for detailed description of methods and further references.</p>
-<p>Let there be <span class="math inline">\(p\)</span> covariates and <span class="math inline">\(n\)</span> samples. Let us model the relationship between the response vector <span class="math inline">\(Y\)</span> and the covariates <span class="math inline">\(X\)</span> as <span class="math inline">\(Y = X\beta+\epsilon\)</span>. Here <span class="math inline">\(\beta\)</span> is a vector of size <span class="math inline">\(p\)</span>. Non-zero values in this vector <span class="math inline">\(\beta\)</span> denote which covariates truly belong in the model. For the covariates, assume the approximate factor model: <span class="math inline">\(X = FB^T+U\)</span>, where <span class="math inline">\(F\)</span> are the <span class="math inline">\(K\)</span> underlying factors, <span class="math inline">\(B\)</span> are the factor loadings and <span class="math inline">\(U\)</span> are the errors.</p>
+<p>Let there be <span class="math inline">\(p\)</span> covariates and <span class="math inline">\(n\)</span> samples. Let us model the relationship between the response vector <span class="math inline">\(Y\)</span> and the covariates <span class="math inline">\(X\)</span> as <span class="math inline">\(Y = X\beta+\epsilon\)</span>. Here <span class="math inline">\(\beta\)</span> is a vector of size <span class="math inline">\(p\)</span>. Non-zero values in this vector <span class="math inline">\(\beta\)</span> denote which covariates truly belong in the model. A logistic regression model is also supported in this package. For the covariates, assume the approximate factor model: <span class="math inline">\(X = FB^T+U\)</span>, where <span class="math inline">\(F\)</span> are the <span class="math inline">\(K\)</span> underlying factors, <span class="math inline">\(B\)</span> are the factor loadings and <span class="math inline">\(U\)</span> are the errors.</p>
 </div>
 <div id="installation" class="section level2">
 <h2>Installation</h2>
@@ -105,10 +105,10 @@ devtools::<span class="kw">install_github</span>(<span class="st">&quot;kbose28/
 </div>
 <div id="main-function-example-model-selection" class="section level2">
 <h2>Main function example: model selection</h2>
-<p>Here we generate data from a factor model with 3 factors. We have 50 samples of 100 dimensional data. The model is of size 5, where the first 5 covariates model coefficients being non-zero and the rest zero. The factors, loadings, errors are all generated from a normal distribution.</p>
+<p>Here we generate data from a factor model with 3 factors. We have 50 samples of 200 dimensional data. The model is of size 5, where the first 5 covariates model coefficients being non-zero and the rest zero. The factors, loadings, errors are all generated from a normal distribution.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(FarmSelect)
 <span class="kw">set.seed</span>(<span class="dv">100</span>)
-P =<span class="st"> </span><span class="dv">100</span> <span class="co">#dimension</span>
+P =<span class="st"> </span><span class="dv">200</span> <span class="co">#dimension</span>
 N =<span class="st"> </span><span class="dv">50</span> <span class="co">#samples</span>
 K =<span class="st"> </span><span class="dv">3</span> <span class="co">#nfactors</span>
 Q =<span class="st"> </span><span class="dv">5</span> <span class="co">#model size</span>
@@ -123,74 +123,62 @@ eps =<span class="st"> </span><span class="kw">rnorm</span>(N)
 Y =<span class="st"> </span>X%*%beta+eps 
 output =<span class="st"> </span><span class="kw">farm.select</span>(Y,X)</code></pre></div>
 <pre><code>## 
-## Call:
+##  Call:
 ## farm.select(Y = Y, X = X)
 ## 
 ##  Factor Adjusted Robust Model Selection 
 ## loss function used: mcp
 ## 
-## p = 100, n = 50
+## p = 200, n = 50
 ## factors found: 3
 ## size of model selected:
 ##  5</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(output)</code></pre></div>
-<pre><code>## [1] &quot;model.size&quot;  &quot;beta.chosen&quot; &quot;coef.chosen&quot; &quot;nfactors&quot;    &quot;X.res&quot;</code></pre>
+<pre><code>## [1] &quot;model.size&quot;  &quot;beta.chosen&quot; &quot;coef.chosen&quot; &quot;nfactors&quot;    &quot;X.residual&quot;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output$beta.chosen</code></pre></div>
 <pre><code>## V1 V2 V3 V4 V5 
 ##  1  2  3  4  5</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output$coef.chosen</code></pre></div>
 <pre><code>##       V1       V2       V3       V4       V5 
-## 3.706534 3.498892 4.566415 3.725966 3.297019</code></pre>
+## 5.533703 4.181028 2.942731 4.744132 4.536507</code></pre>
 <p>The values X.res is the residual covariate matrix after adjusting for factors.</p>
 <p>Now we use a different loss function for the model selection step, along with changing the number of factors.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.select</span>(Y,X, <span class="dt">loss =</span> <span class="st">&quot;scad&quot;</span>, <span class="dt">K.factors =</span> <span class="dv">10</span>)</code></pre></div>
 <pre><code>## 
-## Call:
+##  Call:
 ## farm.select(Y = Y, X = X, loss = &quot;scad&quot;, K.factors = 10)
 ## 
 ##  Factor Adjusted Robust Model Selection 
 ## loss function used: scad
 ## 
-## p = 100, n = 50
+## p = 200, n = 50
 ## factors found: 10
 ## size of model selected:
-##  10</code></pre>
-<p>We may also use robust estimates of all the parameters. This may take more time, depending upon the dimension size of the problem.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.select</span>(Y,X, <span class="dt">robust =</span> <span class="ot">TRUE</span> )</code></pre></div>
-<pre><code>## 
-## Call:
-## farm.select(Y = Y, X = X, robust = TRUE)
-## 
-##  Factor Adjusted Robust Model Selection 
-## loss function used: mcp
-## 
-## p = 100, n = 50
-## factors found: 3
-## size of model selected:
-##  5</code></pre>
+##  6</code></pre>
 <p>For a logistic regression, we do the following:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Prob =<span class="st"> </span><span class="dv">1</span>/(<span class="dv">1</span>+<span class="kw">exp</span>(-X%*%beta))
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">100</span>)
+Prob =<span class="st"> </span><span class="dv">1</span>/(<span class="dv">1</span>+<span class="kw">exp</span>(-X%*%beta))
 Y =<span class="st"> </span><span class="kw">rbinom</span>(N, <span class="dv">1</span>, Prob)
 output =<span class="st"> </span><span class="kw">farm.select</span>(Y,X, <span class="dt">lin.reg=</span><span class="ot">FALSE</span>, <span class="dt">loss =</span> <span class="st">&quot;lasso&quot;</span>)</code></pre></div>
 <pre><code>## 
-## Call:
+##  Call:
 ## farm.select(Y = Y, X = X, loss = &quot;lasso&quot;, lin.reg = FALSE)
 ## 
 ##  Factor Adjusted Robust Model Selection 
 ## loss function used: lasso
 ## 
-## p = 100, n = 50
+## p = 200, n = 50
 ## factors found: 3
 ## size of model selected:
-##  14</code></pre>
+##  6</code></pre>
 <p>The function <code>farm.res</code> adjusts the dataset for latent factors. The number of factors is estimated internally by using the method in <span class="citation">(Ahn and Horenstein 2013)</span>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.res</span>(X)
 <span class="kw">names</span>(output)</code></pre></div>
-<pre><code>## [1] &quot;X.res&quot;    &quot;nfactors&quot; &quot;factod&quot;   &quot;loadings&quot;</code></pre>
+<pre><code>## [1] &quot;X.res&quot;    &quot;nfactors&quot; &quot;factors&quot;  &quot;loadings&quot;</code></pre>
 <p>If known, we can provide this function (or the main function) the number of latent factors. Providing too large a number results in a warning message. The maximum number of factors possible is <span class="math inline">\(\max(n,p)\)</span> but a much smaller number is recommended.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.res</span>(X, <span class="dt">K.factors  =</span> <span class="dv">30</span>)</code></pre></div>
 <pre><code>## Warning in farm.res(X, K.factors = 30): 
-##  Warning: Number of factors supplied is &gt; min(n,p)/2. May cause numerical inconsistencies.</code></pre>
+##  Warning: Number of factors supplied is &gt; min(n,p)/2. May cause numerical inconsistencies</code></pre>
 <p>We see a warning telling us that it is not a good idea to calculate 30 eigenvalues from a dataset that has only 50 samples.</p>
 </div>
 <div id="notes" class="section level2">

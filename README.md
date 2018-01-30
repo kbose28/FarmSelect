@@ -8,7 +8,7 @@ Goal of the package
 
 This R package implements a consistent model selection strategy for high dimensional sparse regression when the covariate dependence can be reduced through factor models. By separating the latent factors from idiosyncratic components, the problem is transformed from model selection with highly correlated covariates to that with weakly correlated variables. It is appropriate for cases where we have many variables compared to the number of samples. Moreover, it implements a robust procedure to estimate distribution parameters wherever possible, hence being suitable for cases when the underlying distribution deviates from Gaussianity, which is commonly assumed in the literature. See the paper on this method, Fan et al.(2017) <https://arxiv.org/abs/1612.08490>, for detailed description of methods and further references.
 
-Let there be *p* covariates and *n* samples. Let us model the relationship between the response vector *Y* and the covariates *X* as ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BY%7D%20%3D%20%5Cmathbf%7BX%7D%5Cbm%7B%5Cbeta%7D%20+%20%5Cepsilon). Here *β* is a vector of size *p*. Non-zero values in this vector *β* denote which covariates truly belong in the model. For the covariates, assume the approximate factor model: ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BX%7D%20%3D%20%5Cmathbf%7BFB%7D%5E%7BT%7D%20+%20%5Cmathbf%7BU%7D), where *F* are the *K* underlying factors, *B* are the factor loadings and *U* are the errors.
+Let there be *p* covariates and *n* samples. Let us model the relationship between the response vector *Y* and the covariates *X* as ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BY%7D%20%3D%20%5Cmathbf%7BX%7D%5Cbm%7B%5Cbeta%7D%20+%20%5Cepsilon). Here *β* is a vector of size *p*. Non-zero values in this vector *β* denote which covariates truly belong in the model. A logistic regression model is also supported in this package. For the covariates, assume the approximate factor model: ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BX%7D%20%3D%20%5Cmathbf%7BFB%7D%5E%7BT%7D%20+%20%5Cmathbf%7BU%7D), where *F* are the *K* underlying factors, *B* are the factor loadings and *U* are the errors.
 
 Installation
 ------------
@@ -44,24 +44,22 @@ Issues
 Functions
 ---------
 
-There are four functions available.
+There are two functions available.
 
 -   `farm.select`: The main function which carries out the entire model testing procedure.
--   `farm.adjust`: Adjusts the data for latent fators.
--   `farm.mean`: Multivariate mean estimation with Huber's loss.
--   `farm.cov`: Multivariate covariance estimation with Huber's loss.
+-   `farm.res`: Adjusts the data for latent fators.
 
 Also see the [`farm.scree`](https://www.rdocumentation.org/packages/FarmTest/versions/1.0.0/topics/farm.scree) function in the [`FarmTest`](https://cran.r-project.org/package=FarmTest) package for how to generate diagnostic plots and output to evaluate the factor adjustment step.
 
 Main function example: model selection
 --------------------------------------
 
-Here we generate data from a factor model with 3 factors. We have 50 samples of 100 dimensional data. The model is of size 5, where the first 5 covariates model coefficients being non-zero and the rest zero. The factors, loadings, errors are all generated from a normal distribution.
+Here we generate data from a factor model with 3 factors. We have 50 samples of 200 dimensional data. The model is of size 5, where the first 5 covariates model coefficients being non-zero and the rest zero. The factors, loadings, errors are all generated from a normal distribution.
 
 ``` r
 library(FarmSelect)
 set.seed(100)
-P = 100 #dimension
+P = 200 #dimension
 N = 50 #samples
 K = 3 #nfactors
 Q = 5 #model size
@@ -75,13 +73,14 @@ beta = c(beta_1, rep(0,P-Q))
 eps = rnorm(N)
 Y = X%*%beta+eps 
 output = farm.select(Y,X)
-#> Call:
+#> 
+#>  Call:
 #> farm.select(Y = Y, X = X)
 #> 
 #>  Factor Adjusted Robust Model Selection 
 #> loss function used: mcp
 #> 
-#> p = 100, n = 50
+#> p = 200, n = 50
 #> factors found: 3
 #> size of model selected:
 #>  5
@@ -89,66 +88,68 @@ output = farm.select(Y,X)
 
 ``` r
 names(output)
-#> [1] "beta.chosen" "coef.chosen" "nfactors"    "X.res"       "Y.res"
+#> [1] "model.size"  "beta.chosen" "coef.chosen" "nfactors"    "X.residual"
 output$beta.chosen
 #> V1 V2 V3 V4 V5 
 #>  1  2  3  4  5
 output$coef.chosen
 #>       V1       V2       V3       V4       V5 
-#> 3.706534 3.498892 4.566415 3.725966 3.297019
+#> 5.533703 4.181028 2.942731 4.744132 4.536507
 ```
 
-The values X.res and Y.res are the covariates and responses after adjusting for latent factors. The formulas for these are ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BY.res%7D%20%3D%20%28%5Cmathbf%7BI%7D_n-%5Cmathbf%7BP%7D%29%20%5Cmathbf%7BY%7D) and ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BX.res%7D%20%3D%20%28%5Cmathbf%7BI%7D_n-%5Cmathbf%7BP%7D%29%20%5Cmathbf%7BX%7D%5E%7BT%7D), where ![equation](https://latex.codecogs.com/gif.latex?%5Cmathbf%7BP%7D%3D%5Chat%7B%5Cmathbf%7BF%7D%7D%28%5Chat%7B%5Cmathbf%7BF%7D%7D%5E%7BT%7D%5Chat%7B%5Cmathbf%7BF%7D%7D%29%5E%7B-1%7D%5Chat%7B%5Cmathbf%7BF%7D%7D%5E%7BT%7D).
+The values X.res is the residual covariate matrix after adjusting for factors.
 
-Now we use a different loss function for the model selection step.
+Now we use a different loss function for the model selection step, along with changing the number of factors.
 
 ``` r
-output = farm.select(Y,X, loss = "lasso" )
-#> Call:
-#> farm.select(Y = Y, X = X, loss = "lasso")
+output = farm.select(Y,X, loss = "scad", K.factors = 10)
+#> 
+#>  Call:
+#> farm.select(Y = Y, X = X, loss = "scad", K.factors = 10)
+#> 
+#>  Factor Adjusted Robust Model Selection 
+#> loss function used: scad
+#> 
+#> p = 200, n = 50
+#> factors found: 10
+#> size of model selected:
+#>  6
+```
+
+For a logistic regression, we do the following:
+
+``` r
+set.seed(100)
+Prob = 1/(1+exp(-X%*%beta))
+Y = rbinom(N, 1, Prob)
+output = farm.select(Y,X, lin.reg=FALSE, loss = "lasso")
+#> 
+#>  Call:
+#> farm.select(Y = Y, X = X, loss = "lasso", lin.reg = FALSE)
 #> 
 #>  Factor Adjusted Robust Model Selection 
 #> loss function used: lasso
 #> 
-#> p = 100, n = 50
+#> p = 200, n = 50
 #> factors found: 3
 #> size of model selected:
-#>  5
+#>  6
 ```
 
-We may also use robust estimates of all the parameters. This may take more time, depending upon the dimension size of the problem.
+The function `farm.res` adjusts the dataset for latent factors. The number of factors is estimated internally by using the method in (Ahn and Horenstein 2013).
 
 ``` r
-output = farm.select(Y,X, robust = TRUE )
-#> Call:
-#> farm.select(Y = Y, X = X, robust = TRUE)
-#> 
-#>  Factor Adjusted Robust Model Selection 
-#> loss function used: mcp
-#> 
-#> p = 100, n = 50
-#> factors found: 3
-#> size of model selected:
-#>  5
-```
-
-Other functions
----------------
-
-The function `farm.adjust` adjusts the dataset for latent factors. The number of factors is estimated internally by using the method in (Ahn and Horenstein 2013).
-
-``` r
-output = farm.adjust(Y,X)
+output = farm.res(X)
 names(output)
-#> [1] "X.res"    "nfactors" "Y.res"
+#> [1] "X.res"    "nfactors" "factors"  "loadings"
 ```
 
 If known, we can provide this function (or the main function) the number of latent factors. Providing too large a number results in a warning message. The maximum number of factors possible is max(*n*, *p*) but a much smaller number is recommended.
 
 ``` r
-output = farm.adjust(Y,X, K.factors  = 30)
-#> Warning in farm.adjust(Y, X, K.factors = 30): Number of factors supplied is
-#> > min(n,p)/2. May cause numerical inconsistencies
+output = farm.res(X, K.factors  = 30)
+#> Warning in farm.res(X, K.factors = 30): 
+#>  Warning: Number of factors supplied is > min(n,p)/2. May cause numerical inconsistencies
 ```
 
 We see a warning telling us that it is not a good idea to calculate 30 eigenvalues from a dataset that has only 50 samples.
