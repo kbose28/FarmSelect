@@ -54,7 +54,7 @@ Also see the [`farm.scree`](https://www.rdocumentation.org/packages/FarmTest/ver
 Main function example: model selection
 --------------------------------------
 
-Here we generate data from a factor model with 3 factors. We have 50 samples of 200 dimensional data. The model is of size 5, where the first 5 covariates model coefficients being non-zero and the rest zero. The factors, loadings, errors are all generated from a normal distribution.
+Here we generate data from a factor model with 3 factors. We have 50 samples of 200 dimensional data. The model is of size 5, where the first 5 covariate coefficients are non-zero and the rest zero. The factors, loadings, errors are all generated from a normal distribution.
 
 ``` r
 library(FarmSelect)
@@ -97,7 +97,7 @@ output$coef.chosen
 #> 5.533703 4.181028 2.942731 4.744132 4.536507
 ```
 
-The values X.res is the residual covariate matrix after adjusting for factors.
+The values X.residual is the residual covariate matrix after adjusting for factors.
 
 Now we use a different loss function for the model selection step, along with changing the number of factors.
 
