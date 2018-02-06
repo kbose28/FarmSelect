@@ -27,6 +27,7 @@ NULL
 #' \item{model.size}{the size of the model}
 #' \item{beta.chosen}{the indices of the covariates chosen in the model}
 #' \item{coef.chosen}{the coefficients of the chosen covariates}
+#' \item{intercept}{the intercept of the fitted model}
 #' \item{X.residual}{the residual covariate matrix after adjusting for factors}
 #' \item{nfactors}{number of (estimated) factors}
 #' @details Number of rows and columns of the covariate matrix must be at least 4 in order to be able to calculate latent factors.
@@ -119,7 +120,7 @@ farm.select.adjusted <- function (Y, X,   loss,robust ,lin.reg,K.factors, max.it
   }
 
   #list all the output
-  list(model.size = output.chosen$model_size, beta.chosen = output.chosen$beta_chosen, coef.chosen = output.chosen$coef_chosen, nfactors = nfactors, X.residual =X.residual)
+  list(model.size = output.chosen$model_size, beta.chosen = output.chosen$beta_chosen, coef.chosen = output.chosen$coef_chosen, intercept = output.chosen$intercept,nfactors = nfactors, X.residual =X.residual)
 }
 #
 
@@ -202,12 +203,12 @@ farm.select.temp<- function(X.res, Y.res,loss, max.iter, nfolds ,factors = NULL)
       beta_SCAD=coef(CV_SCAD, s = "lambda.min", exact=TRUE)
       inds_SCAD=which(beta_SCAD!=0)
       if( length(inds_SCAD)==1){
-        list(beta_chosen= NULL, coef_chosen=NULL,model_size=0 )
+        list(beta_chosen= NULL, coef_chosen=NULL,model_size=0,intercept = beta_SCAD[1] )
         }else{
           inds_SCAD = inds_SCAD[ - which(inds_SCAD ==1)]
           coef_chosen = beta_SCAD[inds_SCAD]
           inds_SCAD = inds_SCAD-1
-          list(beta_chosen= inds_SCAD, coef_chosen=coef_chosen,model_size=length(inds_SCAD))
+          list(beta_chosen= inds_SCAD, coef_chosen=coef_chosen,model_size=length(inds_SCAD), intercept = beta_SCAD[1] )
         }
       }
     else if (loss == "lasso"){
@@ -215,24 +216,24 @@ farm.select.temp<- function(X.res, Y.res,loss, max.iter, nfolds ,factors = NULL)
       beta_lasso=coef(CV_lasso, s = "lambda.min", exact=TRUE)
       inds_lasso=which(beta_lasso!=0)
       if( length(inds_lasso)==1){
-        list(beta_chosen= NULL, coef_chosen=NULL,model_size=0 )
+        list(beta_chosen= NULL, coef_chosen=NULL,model_size=0,intercept = beta_lasso[1] )
         }else{
           inds_lasso = inds_lasso[ - which(inds_lasso ==1)]
           coef_chosen = beta_lasso[inds_lasso]
           inds_lasso = inds_lasso-1
-          list(beta_chosen= inds_lasso, coef_chosen=coef_chosen,model_size=length(inds_lasso))
+          list(beta_chosen= inds_lasso, coef_chosen=coef_chosen,model_size=length(inds_lasso),intercept = beta_lasso[1])
           }
       }else{
         CV_MCP=cv.ncvreg(X.res, Y.res,penalty="MCP",seed=100,nfolds = nfolds, max.iter  = max.iter)
         beta_MCP=coef(CV_MCP, s = "lambda.min", exact=TRUE)
         inds_MCP=which(beta_MCP!=0)
         if( length(inds_MCP)==1){
-          list(beta_chosen= NULL, coef_chosen=NULL ,model_size=0)
+          list(beta_chosen= NULL, coef_chosen=NULL ,model_size=0,intercept = beta_MCP[1])
           }else{
             inds_MCP = inds_MCP[ - which(inds_MCP ==1)]
             coef_chosen = beta_MCP[inds_MCP]
             inds_MCP = inds_MCP-1
-            list(beta_chosen= inds_MCP, coef_chosen=coef_chosen ,model_size=length(inds_MCP))
+            list(beta_chosen= inds_MCP, coef_chosen=coef_chosen ,model_size=length(inds_MCP),intercept = beta_MCP[1])
           }
       }
     }else{
