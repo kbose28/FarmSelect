@@ -140,14 +140,18 @@ farm.adjust<- function(Y , X , robust , lin.reg,K.factors ) {#, robust.cov = FAL
     }
   }
   #estimate covariance matrix
- if(robust ==TRUE){
-  covx =  Cov_Huber(matrix((X),p,n),  matrix(rep(1,n),n,1))
+  if(robust ==TRUE){
+    covx =  Cov_Huber(matrix((X),p,n),  matrix(rep(1,n),n,1))
+    eigs = Eigen_Decomp(covx)
+    values = eigs[,p+1]
+    vectors = eigs[,1:p]
   }else{
-  covx = cov(t(X))
+    covx = cov(t(X))
+    pca_fit=stats::prcomp((X), center = TRUE, scale = TRUE)
+    values = (pca_fit$sdev)^2
+    vectors = pca_fit$rotation
   }
-  eigs = Eigen_Decomp(covx)
-  values = eigs[,p+1]
-  vectors = eigs[,1:p]
+
   #estimate nfactors
   values = pmax(values,0)
   ratio=c()
@@ -334,12 +338,16 @@ farm.res<- function(X ,K.factors = NULL, robust = FALSE) {#, robust.cov = FALSE)
   #estimate covariance matrix
   if(robust ==TRUE){
     covx =  Cov_Huber(matrix((X),p,n),  matrix(rep(1,n),n,1))
+    eigs = Eigen_Decomp(covx)
+    values = eigs[,p+1]
+    vectors = eigs[,1:p]
   }else{
     covx = cov(t(X))
+    pca_fit=stats::prcomp((X), center = TRUE, scale = TRUE)
+    values = (pca_fit$sdev)^2
+    vectors = pca_fit$rotation
   }
-  eigs = Eigen_Decomp(covx)
-  values = eigs[,p+1]
-  vectors = eigs[,1:p]
+
   #estimate nfactors
   values = pmax(values,0)
   ratio=c()
