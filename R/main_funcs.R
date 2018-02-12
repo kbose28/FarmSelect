@@ -27,7 +27,6 @@ NULL
 #' \item{model.size}{the size of the model}
 #' \item{beta.chosen}{the indices of the covariates chosen in the model}
 #' \item{coef.chosen}{the coefficients of the chosen covariates}
-#' \item{intercept}{the intercept of the fitted model}
 #' \item{X.residual}{the residual covariate matrix after adjusting for factors}
 #' \item{nfactors}{number of (estimated) factors}
 #' @details Number of rows and columns of the covariate matrix must be at least 4 in order to be able to calculate latent factors.
@@ -120,7 +119,7 @@ farm.select.adjusted <- function (Y, X,   loss,robust ,lin.reg,K.factors, max.it
   }
 
   #list all the output
-  list(model.size = output.chosen$model_size, beta.chosen = output.chosen$beta_chosen, coef.chosen = output.chosen$coef_chosen, intercept = output.chosen$intercept,nfactors = nfactors, X.residual =X.residual)
+  list(model.size = output.chosen$model_size, beta.chosen = output.chosen$beta_chosen, coef.chosen = output.chosen$coef_chosen, nfactors = nfactors, X.residual =X.residual)
 }
 #
 
@@ -131,6 +130,15 @@ farm.adjust<- function(Y , X , robust , lin.reg,K.factors ) {#, robust.cov = FAL
   n = NCOL(X)
   if(min(n,p)<=4) stop('\n n and p must be at least 4 \n')
 
+  if(any(abs(rowMeans(X))>0.00000001)){
+    if(robust ==TRUE){
+      X.mean = mu_robust_F(matrix(X,p,n), matrix(rep(1,n),n,1))
+      X = sweep(X, 1,X.mean,"-")
+    }else{
+      X.mean = rowMeans(X)
+      X = sweep(X, 1,X.mean,"-")
+    }
+  }
   #estimate covariance matrix
  if(robust ==TRUE){
   covx =  Cov_Huber(matrix((X),p,n),  matrix(rep(1,n),n,1))
@@ -194,12 +202,12 @@ farm.select.temp<- function(X.res, Y.res,loss, max.iter, nfolds ,factors = NULL)
       beta_SCAD=coef(CV_SCAD, s = "lambda.min", exact=TRUE)
       inds_SCAD=which(beta_SCAD!=0)
       if( length(inds_SCAD)==1){
-        list(beta_chosen= NULL, coef_chosen=NULL,model_size=0,intercept = beta_SCAD[1] )
+        list(beta_chosen= NULL, coef_chosen=NULL,model_size=0 )
         }else{
           inds_SCAD = inds_SCAD[ - which(inds_SCAD ==1)]
           coef_chosen = beta_SCAD[inds_SCAD]
           inds_SCAD = inds_SCAD-1
-          list(beta_chosen= inds_SCAD, coef_chosen=coef_chosen,model_size=length(inds_SCAD), intercept = beta_SCAD[1] )
+          list(beta_chosen= inds_SCAD, coef_chosen=coef_chosen,model_size=length(inds_SCAD))
         }
       }
     else if (loss == "lasso"){
@@ -207,24 +215,24 @@ farm.select.temp<- function(X.res, Y.res,loss, max.iter, nfolds ,factors = NULL)
       beta_lasso=coef(CV_lasso, s = "lambda.min", exact=TRUE)
       inds_lasso=which(beta_lasso!=0)
       if( length(inds_lasso)==1){
-        list(beta_chosen= NULL, coef_chosen=NULL,model_size=0,intercept = beta_lasso[1] )
+        list(beta_chosen= NULL, coef_chosen=NULL,model_size=0 )
         }else{
           inds_lasso = inds_lasso[ - which(inds_lasso ==1)]
           coef_chosen = beta_lasso[inds_lasso]
           inds_lasso = inds_lasso-1
-          list(beta_chosen= inds_lasso, coef_chosen=coef_chosen,model_size=length(inds_lasso),intercept = beta_lasso[1])
+          list(beta_chosen= inds_lasso, coef_chosen=coef_chosen,model_size=length(inds_lasso))
           }
       }else{
         CV_MCP=cv.ncvreg(X.res, Y.res,penalty="MCP",seed=100,nfolds = nfolds, max.iter  = max.iter)
         beta_MCP=coef(CV_MCP, s = "lambda.min", exact=TRUE)
         inds_MCP=which(beta_MCP!=0)
         if( length(inds_MCP)==1){
-          list(beta_chosen= NULL, coef_chosen=NULL ,model_size=0,intercept = beta_MCP[1])
+          list(beta_chosen= NULL, coef_chosen=NULL ,model_size=0)
           }else{
             inds_MCP = inds_MCP[ - which(inds_MCP ==1)]
             coef_chosen = beta_MCP[inds_MCP]
             inds_MCP = inds_MCP-1
-            list(beta_chosen= inds_MCP, coef_chosen=coef_chosen ,model_size=length(inds_MCP),intercept = beta_MCP[1])
+            list(beta_chosen= inds_MCP, coef_chosen=coef_chosen ,model_size=length(inds_MCP))
           }
       }
     }else{
@@ -314,6 +322,15 @@ farm.res<- function(X ,K.factors = NULL, robust = FALSE) {#, robust.cov = FALSE)
   n = NCOL(X)
   if(min(n,p)<=4) stop('\n n and p must be at least 4 \n')
 
+  if(any(abs(rowMeans(X))>0.00000001)){
+    if(robust ==TRUE){
+      X.mean = mu_robust_F(matrix(X,p,n), matrix(rep(1,n),n,1))
+      X = sweep(X, 1,X.mean,"-")
+    }else{
+      X.mean = rowMeans(X)
+      X = sweep(X, 1,X.mean,"-")
+    }
+  }
   #estimate covariance matrix
   if(robust ==TRUE){
     covx =  Cov_Huber(matrix((X),p,n),  matrix(rep(1,n),n,1))
@@ -333,15 +350,6 @@ farm.res<- function(X ,K.factors = NULL, robust = FALSE) {#, robust.cov = FALSE)
     K.factors = which.min(ratio)} else {K.factors}
   if(K.factors>min(n,p)/2) warning('\n Warning: Number of factors supplied is > min(n,p)/2. May cause numerical inconsistencies \n')
   if(K.factors>max(n,p)) stop('\n Number of factors cannot be larger than n or p \n')
-
-
-  if(robust ==TRUE){
-    X.mean = mu_robust_F(matrix(X,p,n), matrix(rep(1,n),n,1))
-    X = sweep(X, 1,X.mean,"-")
-  }else{
-    X.mean = rowMeans(X)
-    X = sweep(X, 1,X.mean,"-")
-  }
 
   #using K.factors estimate the factors and loadings
   Lambda_hat = Find_lambda_class(Sigma = matrix(covx,p,p), (X), n, p,  K.factors)
