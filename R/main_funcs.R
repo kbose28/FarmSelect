@@ -314,15 +314,6 @@ farm.res<- function(X ,K.factors = NULL, robust = FALSE) {#, robust.cov = FALSE)
   n = NCOL(X)
   if(min(n,p)<=4) stop('\n n and p must be at least 4 \n')
 
-  if(robust ==TRUE){
-    X.mean = mu_robust_F(matrix(X,p,n), matrix(rep(1,n),n,1))
-    X = sweep(X, 1,X.mean,"-")
-  }else{
-    X.mean = rowMeans(X)
-    X = sweep(X, 1,X.mean,"-")
-  }
-
-
   #estimate covariance matrix
   if(robust ==TRUE){
     covx =  Cov_Huber(matrix((X),p,n),  matrix(rep(1,n),n,1))
@@ -342,6 +333,15 @@ farm.res<- function(X ,K.factors = NULL, robust = FALSE) {#, robust.cov = FALSE)
     K.factors = which.min(ratio)} else {K.factors}
   if(K.factors>min(n,p)/2) warning('\n Warning: Number of factors supplied is > min(n,p)/2. May cause numerical inconsistencies \n')
   if(K.factors>max(n,p)) stop('\n Number of factors cannot be larger than n or p \n')
+
+
+  if(robust ==TRUE){
+    X.mean = mu_robust_F(matrix(X,p,n), matrix(rep(1,n),n,1))
+    X = sweep(X, 1,X.mean,"-")
+  }else{
+    X.mean = rowMeans(X)
+    X = sweep(X, 1,X.mean,"-")
+  }
 
   #using K.factors estimate the factors and loadings
   Lambda_hat = Find_lambda_class(Sigma = matrix(covx,p,p), (X), n, p,  K.factors)
