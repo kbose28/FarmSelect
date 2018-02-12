@@ -131,15 +131,6 @@ farm.adjust<- function(Y , X , robust , lin.reg,K.factors ) {#, robust.cov = FAL
   n = NCOL(X)
   if(min(n,p)<=4) stop('\n n and p must be at least 4 \n')
 
-  if(any(abs(rowMeans(X))>0.00000001)){
-    if(robust ==TRUE){
-      X.mean = mu_robust_F(matrix(X,p,n), matrix(rep(1,n),n,1))
-      X = sweep(X, 1,X.mean,"-")
-    }else{
-      X.mean = rowMeans(X)
-      X = sweep(X, 1,X.mean,"-")
-    }
-  }
   #estimate covariance matrix
  if(robust ==TRUE){
   covx =  Cov_Huber(matrix((X),p,n),  matrix(rep(1,n),n,1))
@@ -323,15 +314,15 @@ farm.res<- function(X ,K.factors = NULL, robust = FALSE) {#, robust.cov = FALSE)
   n = NCOL(X)
   if(min(n,p)<=4) stop('\n n and p must be at least 4 \n')
 
-  if(any(abs(rowMeans(X))>0.00000001)){
-    if(robust ==TRUE){
-      X.mean = mu_robust_F(matrix(X,p,n), matrix(rep(1,n),n,1))
-      X = sweep(X, 1,X.mean,"-")
-    }else{
-      X.mean = rowMeans(X)
-      X = sweep(X, 1,X.mean,"-")
-    }
+  if(robust ==TRUE){
+    X.mean = mu_robust_F(matrix(X,p,n), matrix(rep(1,n),n,1))
+    X = sweep(X, 1,X.mean,"-")
+  }else{
+    X.mean = rowMeans(X)
+    X = sweep(X, 1,X.mean,"-")
   }
+
+
   #estimate covariance matrix
   if(robust ==TRUE){
     covx =  Cov_Huber(matrix((X),p,n),  matrix(rep(1,n),n,1))
