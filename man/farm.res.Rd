@@ -4,14 +4,16 @@
 \alias{farm.res}
 \title{Adjusting a data matrix for underlying factors}
 \usage{
-farm.res(X, K.factors = NULL, robust = FALSE)
+farm.res(X, K.factors = NULL, robust = TRUE, tau = NULL)
 }
 \arguments{
 \item{X}{an n x p data matrix with each row being a sample.}
 
 \item{K.factors}{a \emph{optional} number of factors to be estimated. Otherwise estimated internally. K>0.}
 
-\item{robust}{an \emph{optional} boolean, specifying whether or not to use robust estimators for mean and variance. Default is FALSE.}
+\item{robust}{an \emph{optional} boolean, specifying whether or not to use robust estimators for mean and variance. Default is TRUE.}
+
+\item{tau}{tuning parameter for Huber loss function. Default is 3*(standard deviateion of the data). Only used if \code{robust} is TRUE.}
 }
 \value{
 A list with the following items
@@ -31,6 +33,8 @@ Using \code{robust.cov = TRUE} uses the Huber's loss to estimate the covariance 
 Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
 
 Number of latent factors, if not provided, is estimated by the eignevalue ratio test. See Ahn and Horenstein(2013).
+
+The tuning parameter \code{tau = sd(data)} where the data is whatever we want to pass into the Huber loss function. For example, while calcualting covariance between X1 and X2, \code{tau = 3*sd(X1*X2)}.
 }
 \examples{
 set.seed(100)

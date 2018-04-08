@@ -29,12 +29,20 @@ Robust_estimate <- function(X, phi, B, CT) {
     .Call('_FarmSelect_Robust_estimate', PACKAGE = 'FarmSelect', X, phi, B, CT)
 }
 
+mu_robust_F_noCV <- function(X, phi, tau) {
+    .Call('_FarmSelect_mu_robust_F_noCV', PACKAGE = 'FarmSelect', X, phi, tau)
+}
+
 mu_robust_F <- function(X, phi) {
     .Call('_FarmSelect_mu_robust_F', PACKAGE = 'FarmSelect', X, phi)
 }
 
 Cov_Huber <- function(X, phi) {
     .Call('_FarmSelect_Cov_Huber', PACKAGE = 'FarmSelect', X, phi)
+}
+
+Cov_Huber_noCV <- function(X, phi, tau) {
+    .Call('_FarmSelect_Cov_Huber_noCV', PACKAGE = 'FarmSelect', X, phi, tau)
 }
 
 Find_factors <- function(Sigma, X, N, P, K) {

@@ -4,28 +4,30 @@
 \alias{farm.select}
 \title{Factor-adjusted robust model selection}
 \usage{
-farm.select(Y, X, loss = c("mcp", "scad", "lasso"), verbose = TRUE,
-  robust = FALSE, lin.reg = TRUE, K.factors = NULL, max.iter = 10000,
-  nfolds = ceiling(length(Y)/3))
+farm.select(X, Y, loss = c("scad", "mcp", "lasso"), verbose = TRUE,
+  robust = TRUE, tau = NULL, lin.reg = TRUE, K.factors = NULL,
+  max.iter = 10000, nfolds = ceiling(length(Y)/3))
 }
 \arguments{
-\item{Y}{a size n outcome vector.}
-
 \item{X}{an n x p covariate matrix with each row being a sample. Must have same number of rows as the size of \code{Y}.}
 
-\item{loss}{an \emph{optional} character string specifying the loss function to be minimized. Must be one of "mcp" (default), "scad" or "lasso". You can just specify the initial letter.}
+\item{Y}{a size n outcome vector.}
+
+\item{loss}{a character string specifying the loss function to be minimized. Must be one of "scad" (default) "mcp" or "lasso". You can just specify the initial letter.}
 
 \item{verbose}{a boolean determining whether or not to print output to the console. Default is TRUE.}
 
-\item{robust}{a boolean, specifying whether or not to use robust estimators for mean and variance. Default is FALSE.}
+\item{robust}{a boolean, specifying whether or not to use robust estimators for mean and variance. Default is TRUE.}
+
+\item{tau}{tuning parameter for Huber loss function. Default is 3*(standard deviateion of the data). Only used if \code{robust} is TRUE.}
 
 \item{lin.reg}{a boolean, specifying whether or not to assume that we have a linear regression model (TRUE) or a logit model (FALSE) structure. Default is TRUE.}
 
-\item{K.factors}{a \emph{optional} number of factors to be estimated. Otherwise estimated internally. K>0.}
+\item{K.factors}{number of factors to be estimated. Otherwise estimated internally. K>0.}
 
-\item{max.iter}{Maximum number of iterations across the regularization path. Default is 10000.}
+\item{max.iter}{maximum number of iterations across the regularization path. Default is 10000.}
 
-\item{nfolds}{The number of cross-validation folds. Default is ceiling(samplesize/3).}
+\item{nfolds}{the number of cross-validation folds. Default is ceiling(samplesize/3).}
 }
 \value{
 A list with the following items
@@ -44,6 +46,8 @@ Number of rows and columns of the covariate matrix must be at least 4 in order t
 For details about the method, see Fan et al.(2017).
 
 For formula of how the covariates are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
+
+The tuning parameter \code{tau = sd(data)} where the data is whatever we want to pass into the Huber loss function. For example, while calcualting covariance between X1 and X2, \code{tau = 3*sd(X1*X2)}.
 }
 \examples{
 set.seed(100)
@@ -62,17 +66,17 @@ eps = rnorm(N)
 Y = X\%*\%beta+eps
 
 ##with default options
-output = farm.select(Y,X)
+output = farm.select(X,Y)
 output$beta.chosen #variables selected
 output$coef.chosen #coefficients of selected variables
 
 ##changing the loss function and inputting factors
-output = farm.select(Y,X, loss = "scad", K.factors = 4)
+output = farm.select(X, Y,loss = "mcp", K.factors = 4)
 
 ##use a logistic regression model
 Prob = 1/(1+exp(-X\%*\%beta))
 Y = rbinom(N, 1, Prob)
-output = farm.select(Y,X, lin.reg=FALSE, loss = "lasso")
+output = farm.select(X, Y,lin.reg=FALSE, loss = "lasso")
 
 }
 \references{

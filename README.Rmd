@@ -99,7 +99,7 @@ beta_1 = 3+3*runif(Q)
 beta = c(beta_1, rep(0,P-Q))
 eps = rnorm(N)
 Y = X%*%beta+eps 
-output = farm.select(Y,X)
+output = farm.select(X,Y)
 ```
 ```{r}
 names(output)
@@ -110,7 +110,7 @@ The values X.residual is the residual covariate matrix after adjusting for facto
 
 Now we use a different loss function for the model selection step, along with changing the number of factors.
 ```{r}
-output = farm.select(Y,X, loss = "scad", K.factors = 10)
+output = farm.select(X,Y, loss = "mcp", K.factors = 10)
 ```
 
 For a logistic regression, we do the following: 
@@ -118,7 +118,7 @@ For a logistic regression, we do the following:
 set.seed(100)
 Prob = 1/(1+exp(-X%*%beta))
 Y = rbinom(N, 1, Prob)
-output = farm.select(Y,X, lin.reg=FALSE, loss = "lasso")
+output = farm.select(X,Y, lin.reg=FALSE, loss = "lasso")
 ```
 The function ``farm.res`` adjusts the dataset for latent factors. The number of factors is estimated internally by using the method in [@ah2013].
 ```{r}

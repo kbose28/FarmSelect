@@ -19,7 +19,7 @@ beta_1 = 3+3*runif(Q)
 beta = c(beta_1, rep(0,P-Q))
 eps = rnorm(N)
 Y = X%*%beta+eps 
-output = farm.select(Y,X)
+output = farm.select(X,Y)
 
 ## ------------------------------------------------------------------------
 names(output)
@@ -27,13 +27,13 @@ output$beta.chosen
 output$coef.chosen
 
 ## ------------------------------------------------------------------------
-output = farm.select(Y,X, loss = "scad", K.factors = 10)
+output = farm.select(X,Y, loss = "mcp", K.factors = 10)
 
 ## ------------------------------------------------------------------------
 set.seed(100)
 Prob = 1/(1+exp(-X%*%beta))
 Y = rbinom(N, 1, Prob)
-output = farm.select(Y,X, lin.reg=FALSE, loss = "lasso")
+output = farm.select(X,Y, lin.reg=FALSE, loss = "lasso")
 
 ## ------------------------------------------------------------------------
 output = farm.res(X)

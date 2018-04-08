@@ -220,6 +220,31 @@ arma::mat Robust_estimate (arma::mat X, arma::mat phi, arma::mat B, float CT)
 
 
 // [[Rcpp::export]]
+arma::mat mu_robust_F_noCV( arma::mat X, arma::mat phi, arma::mat tau)
+{
+  using namespace arma;
+  int i, P, K;
+  P=X.n_rows;
+  K=phi.n_cols;
+  float tau_select;
+  mat F_H_0; F_H_0.ones(K);
+  mat Xi;
+  mat mu_hat; mu_hat.zeros(K,P);
+
+  for(i=0;i<P;i++){
+    Rcpp::checkUserInterrupt();
+    Xi=X.row(i);
+    F_H_0=solve(phi,trans(Xi));
+    tau_select  = tau(i);
+    mu_hat.col(i)=Huber_descent(Xi, phi, F_H_0,tau_select);
+  }
+  return mu_hat;
+
+}
+
+
+
+// [[Rcpp::export]]
 arma::mat mu_robust_F( arma::mat X, arma::mat phi)
 {
   using namespace arma;
@@ -265,7 +290,7 @@ arma::mat Cov_Huber( arma::mat X, arma::mat phi)
     for(j=0;j<=i;j++){
       Xi=X.row(i); Xj=X.row(j);
       F_H_0=solve(phi,trans(Xi%Xj));
-      Tau= Robust_CV (trans(Xi%Xj), phi);
+      Tau = Robust_CV (trans(Xi%Xj), phi);
       Sigma_hat(i,j)=arma::conv_to<double>::from(Huber_descent (Xi%Xj,phi, F_H_0, Tau));
       Sigma_hat(j,i)=Sigma_hat(i,j);
     }
@@ -276,6 +301,39 @@ arma::mat Cov_Huber( arma::mat X, arma::mat phi)
 
 }
 
+
+//Output: Estimated cov matrix Sigma_hat
+// [[Rcpp::export]]
+arma::mat Cov_Huber_noCV( arma::mat X, arma::mat phi, arma::mat tau)
+{
+  using namespace arma;
+  int i, j, P=X.n_rows;
+
+
+  //Tuning parameter
+  float tau_select;
+
+  //Define the matrices
+  mat Xi, Xj;
+  mat Sigma_hat; Sigma_hat.zeros(P,P);
+  mat F_H_0; F_H_0.ones(1);
+
+  //Entry-wise Huber method
+  for(i=0;i<P;i++){
+    Rcpp::checkUserInterrupt();
+    for(j=0;j<=i;j++){
+      Xi=X.row(i); Xj=X.row(j);
+      F_H_0=solve(phi,trans(Xi%Xj));
+      tau_select = tau(i,j);
+      Sigma_hat(i,j)=arma::conv_to<double>::from(Huber_descent (Xi%Xj,phi, F_H_0, tau_select));
+      Sigma_hat(j,i)=Sigma_hat(i,j);
+    }
+  }
+
+
+  return Sigma_hat;
+
+}
 
 
 

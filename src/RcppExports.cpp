@@ -101,6 +101,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// mu_robust_F_noCV
+arma::mat mu_robust_F_noCV(arma::mat X, arma::mat phi, arma::mat tau);
+RcppExport SEXP _FarmSelect_mu_robust_F_noCV(SEXP XSEXP, SEXP phiSEXP, SEXP tauSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type tau(tauSEXP);
+    rcpp_result_gen = Rcpp::wrap(mu_robust_F_noCV(X, phi, tau));
+    return rcpp_result_gen;
+END_RCPP
+}
 // mu_robust_F
 arma::mat mu_robust_F(arma::mat X, arma::mat phi);
 RcppExport SEXP _FarmSelect_mu_robust_F(SEXP XSEXP, SEXP phiSEXP) {
@@ -122,6 +135,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type phi(phiSEXP);
     rcpp_result_gen = Rcpp::wrap(Cov_Huber(X, phi));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Cov_Huber_noCV
+arma::mat Cov_Huber_noCV(arma::mat X, arma::mat phi, arma::mat tau);
+RcppExport SEXP _FarmSelect_Cov_Huber_noCV(SEXP XSEXP, SEXP phiSEXP, SEXP tauSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type tau(tauSEXP);
+    rcpp_result_gen = Rcpp::wrap(Cov_Huber_noCV(X, phi, tau));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -239,8 +265,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_FarmSelect_Huber_descent", (DL_FUNC) &_FarmSelect_Huber_descent, 4},
     {"_FarmSelect_Robust_CV", (DL_FUNC) &_FarmSelect_Robust_CV, 2},
     {"_FarmSelect_Robust_estimate", (DL_FUNC) &_FarmSelect_Robust_estimate, 4},
+    {"_FarmSelect_mu_robust_F_noCV", (DL_FUNC) &_FarmSelect_mu_robust_F_noCV, 3},
     {"_FarmSelect_mu_robust_F", (DL_FUNC) &_FarmSelect_mu_robust_F, 2},
     {"_FarmSelect_Cov_Huber", (DL_FUNC) &_FarmSelect_Cov_Huber, 2},
+    {"_FarmSelect_Cov_Huber_noCV", (DL_FUNC) &_FarmSelect_Cov_Huber_noCV, 3},
     {"_FarmSelect_Find_factors", (DL_FUNC) &_FarmSelect_Find_factors, 5},
     {"_FarmSelect_Find_PF", (DL_FUNC) &_FarmSelect_Find_PF, 2},
     {"_FarmSelect_Find_lambda_class", (DL_FUNC) &_FarmSelect_Find_lambda_class, 5},
