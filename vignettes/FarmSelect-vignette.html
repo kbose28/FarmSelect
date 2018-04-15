@@ -12,7 +12,7 @@
 
 <meta name="author" content="Koushiki Bose" />
 
-<meta name="date" content="2018-04-08" />
+<meta name="date" content="2018-04-15" />
 
 <title>FarmSelect: Factor Adjusted Robust Model Selection</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">FarmSelect: Factor Adjusted Robust Model Selection</h1>
 <h4 class="author"><em>Koushiki Bose</em></h4>
-<h4 class="date"><em>2018-04-08</em></h4>
+<h4 class="date"><em>2018-04-15</em></h4>
 
 
 
@@ -89,25 +89,35 @@ devtools<span class="op">::</span><span class="kw">install_github</span>(<span c
 </div>
 <div id="getting-help" class="section level2">
 <h2>Getting help</h2>
+<p>Help on the functions can be accessed by typing “?”, followed by function name at the R command prompt.</p>
+</div>
+<div id="issues" class="section level2">
+<h2>Issues</h2>
 <ul>
-<li><p>Help on the functions can be accessed by typing “?”, followed by function name at the R command prompt.</p></li>
-<li><p>For up to date information, help with installation issues and questions/comments see the project page at <a href="https://kbose28.github.io/FarmSelect/" class="uri">https://kbose28.github.io/FarmSelect/</a>.</p></li>
+<li><p>Error: “…could not find build tools necessary to build FarmSelect”: Since <code>FarmSelect</code> relies on <code>C++</code> code, command line tools need to be installed to compile the code. For Windows you need Rtools, for Mac OS X you need to install Command Line Tools for XCode. See (<a href="https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites" class="uri">https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites</a>).</p></li>
+<li><p>Error: “library not found for -lgfortran/-lquadmath”: It means your gfortran binaries are out of date. This is a common environment specific issue.</p>
+<ol style="list-style-type: decimal">
+<li><p>In R 3.0.0 - R 3.3.0: Upgrading to R 3.4 is strongly recommended. Then go to the next step. Alternatively, you can try the instructions here: <a href="http://thecoatlessprofessor.com/programming/rcpp-rcpparmadillo-and-os-x-mavericks-lgfortran-and-lquadmath-error/" class="uri">http://thecoatlessprofessor.com/programming/rcpp-rcpparmadillo-and-os-x-mavericks-lgfortran-and-lquadmath-error/</a>.</p></li>
+<li><p>For &gt;= R 3.4.* : download the installer from the here: <a href="https://gcc.gnu.org/wiki/GFortranBinaries#MacOS" class="uri">https://gcc.gnu.org/wiki/GFortranBinaries#MacOS</a>. Now simply run the installer. (If installer is not available for your version of OS, use the latest one.)</p></li>
+</ol></li>
+<li><p>Error: “… .rdb’: No such file or directory” Try devtools::install_github(“kbose28/FarmSelect”, dependencies=TRUE)</p></li>
+<li><p>Error in RStudio even after installing XCode: “Could not find tools necessary to build FarmSelect”: This is a known bug in RStudio. Try options(buildtools.check=function(action) TRUE) in RStudio to prevent RStudio from validating build tools.</p></li>
 </ul>
 </div>
 <div id="functions" class="section level2">
 <h2>Functions</h2>
 <p>There are two functions available.</p>
 <ul>
-<li><code>farm.select</code>: The main function which carries out the entire model testing procedure.</li>
+<li><code>farm.select</code>: The main function which carries out the entire model testing procedure. Has its own print function.</li>
 <li><code>farm.res</code>: Adjusts the data for latent fators.</li>
 </ul>
-<p>Also see the <a href="https://www.rdocumentation.org/packages/FarmTest/versions/1.0.0/topics/farm.scree"><code>farm.scree</code></a> function in the <a href="https://CRAN.R-project.org/package=FarmTest"><code>FarmTest</code></a> package for how to generate diagnostic plots and output to evaluate the factor adjustment step.</p>
+<p>Also see the <a href="https://www.rdocumentation.org/packages/FarmTest/versions/1.0.0/topics/farm.scree"><code>farm.scree</code></a> function in the <a href="https://cran.r-project.org/package=FarmTest"><code>FarmTest</code></a> package for how to generate diagnostic plots and output to evaluate the factor adjustment step.</p>
 </div>
 <div id="main-function-example-model-selection" class="section level2">
 <h2>Main function example: model selection</h2>
 <p>Here we generate data from a factor model with 3 factors. We have 50 samples of 200 dimensional data. The model is of size 5, where the first 5 covariate coefficients are non-zero and the rest zero. The factors, loadings, errors are all generated from a normal distribution.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(FarmSelect)
-<span class="kw">set.seed</span>(<span class="dv">100</span>)
+<span class="kw">set.seed</span>(<span class="dv">10</span>)
 P =<span class="st"> </span><span class="dv">200</span> <span class="co">#dimension</span>
 N =<span class="st"> </span><span class="dv">50</span> <span class="co">#samples</span>
 K =<span class="st"> </span><span class="dv">3</span> <span class="co">#nfactors</span>
@@ -120,12 +130,12 @@ X =<span class="st"> </span><span class="kw">t</span>(X)
 beta_<span class="dv">1</span> =<span class="st"> </span><span class="dv">3</span><span class="op">+</span><span class="dv">3</span><span class="op">*</span><span class="kw">runif</span>(Q)
 beta =<span class="st"> </span><span class="kw">c</span>(beta_<span class="dv">1</span>, <span class="kw">rep</span>(<span class="dv">0</span>,P<span class="op">-</span>Q))
 eps =<span class="st"> </span><span class="kw">rnorm</span>(N)
+eps =<span class="st"> </span><span class="kw">rt</span>(N, <span class="fl">2.5</span>)
+
 Y =<span class="st"> </span>X<span class="op">%*%</span>beta<span class="op">+</span>eps 
-output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y)</code></pre></div>
+output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y) <span class="co">#robust, no cross-validation</span>
+output</code></pre></div>
 <pre><code>## 
-##  Call:
-## farm.select(X = X, Y = Y)
-## 
 ##  Factor Adjusted Robust Model Selection 
 ## loss function used: scad
 ## 
@@ -134,41 +144,33 @@ output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y)</code>
 ## size of model selected:
 ##  5</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(output)</code></pre></div>
-<pre><code>## [1] &quot;model.size&quot;  &quot;beta.chosen&quot; &quot;coef.chosen&quot; &quot;nfactors&quot;    &quot;X.residual&quot;</code></pre>
+<pre><code>## [1] &quot;model.size&quot;  &quot;beta.chosen&quot; &quot;coef.chosen&quot; &quot;nfactors&quot;    &quot;X.residual&quot; 
+## [6] &quot;p&quot;           &quot;n&quot;           &quot;robust&quot;      &quot;loss&quot;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output<span class="op">$</span>beta.chosen</code></pre></div>
 <pre><code>## [1] 1 2 3 4 5</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output<span class="op">$</span>coef.chosen</code></pre></div>
-<pre><code>## [1] 5.533703 4.181027 2.942731 4.744132 4.536507</code></pre>
+<pre><code>## [1] 4.077835 5.377627 3.308710 5.640872 4.803159</code></pre>
 <p>The values X.residual is the residual covariate matrix after adjusting for factors.</p>
 <p>Now we use a different loss function for the model selection step, along with changing the number of factors.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y, <span class="dt">loss =</span> <span class="st">&quot;mcp&quot;</span>, <span class="dt">K.factors =</span> <span class="dv">10</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">farm.select</span>(X,Y, <span class="dt">loss =</span> <span class="st">&quot;mcp&quot;</span>, <span class="dt">K.factors =</span> <span class="dv">10</span>)</code></pre></div>
 <pre><code>## 
-##  Call:
-## farm.select(X = X, Y = Y, loss = &quot;mcp&quot;, K.factors = 10)
-## 
 ##  Factor Adjusted Robust Model Selection 
 ## loss function used: mcp
 ## 
 ## p = 200, n = 50
 ## factors found: 10
 ## size of model selected:
-##  6</code></pre>
+##  7</code></pre>
+<p>The robustness is controlled by the parameter of the Huber loss function. This can be chosen by cross-validation which takes a long time, but gives good results. Altenratively, we supply our own parameter <span class="math inline">\(C*sd*rate\)</span> where <span class="math inline">\(C\)</span> is a constant, rate is the optimal rate for the tuning parameter. See Fan et al.(2017) <a href="https://arxiv.org/abs/1612.08490" class="uri">https://arxiv.org/abs/1612.08490</a>. <span class="math inline">\(sd\)</span> is the standard deviation of the residuals after running the OLS version of the Huber’s estimator for the parameter to be estimated.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#examples of other robustification options</span>
+output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y,<span class="dt">robust =</span> <span class="ot">FALSE</span>) <span class="co">#non-robust</span>
+output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y, <span class="dt">tau =</span> <span class="dv">3</span>) <span class="co">#robust, no cross-validation, specified tau</span>
+<span class="co">#output = farm.select(X,Y, cv = TRUE) #robust, cross-validation, LONG RUNNING!!</span></code></pre></div>
 <p>For a logistic regression, we do the following:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">100</span>)
 Prob =<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(<span class="op">-</span>X<span class="op">%*%</span>beta))
 Y =<span class="st"> </span><span class="kw">rbinom</span>(N, <span class="dv">1</span>, Prob)
 output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y, <span class="dt">lin.reg=</span><span class="ot">FALSE</span>, <span class="dt">loss =</span> <span class="st">&quot;lasso&quot;</span>)</code></pre></div>
-<pre><code>## 
-##  Call:
-## farm.select(X = X, Y = Y, loss = &quot;lasso&quot;, lin.reg = FALSE)
-## 
-##  Factor Adjusted Robust Model Selection 
-## loss function used: lasso
-## 
-## p = 200, n = 50
-## factors found: 3
-## size of model selected:
-##  6</code></pre>
 <p>The function <code>farm.res</code> adjusts the dataset for latent factors. The number of factors is estimated internally by using the method in <span class="citation">(Ahn and Horenstein 2013)</span>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.res</span>(X)
 <span class="kw">names</span>(output)</code></pre></div>

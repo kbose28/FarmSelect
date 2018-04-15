@@ -48,18 +48,31 @@ library(FarmSelect)
 
 ##Getting help
 
-* Help on the functions can be accessed by typing "?", followed by function name at the R command prompt. 
+Help on the functions can be accessed by typing "?", followed by function name at the R command prompt. 
 
-* For up to date information, help with installation issues and questions/comments see the project page at https://kbose28.github.io/FarmSelect/.
+##Issues
+
+* Error: "...could not find build tools necessary to build FarmSelect": Since `FarmSelect` relies on `C++` code, command line tools need to be installed to compile the code. For Windows you need Rtools, for Mac OS X you need to install Command Line Tools for XCode. See (https://support.rstudio.com/hc/en-us/articles/200486498-Package-Development-Prerequisites). 
+
+* Error: "library not found for -lgfortran/-lquadmath": It means your gfortran binaries are out of date. This is a common environment specific issue. 
+
+    1. In R 3.0.0 - R 3.3.0: Upgrading to R 3.4 is strongly recommended. Then go to the next step. Alternatively, you can try the instructions here: http://thecoatlessprofessor.com/programming/rcpp-rcpparmadillo-and-os-x-mavericks-lgfortran-and-lquadmath-error/. 
+
+    2. For >= R 3.4.* : download the installer from the here: https://gcc.gnu.org/wiki/GFortranBinaries#MacOS. Now simply run the installer. (If installer is not available for your version of OS, use the latest one.)
+
+* Error: "... .rdb': No such file or directory" Try devtools::install_github("kbose28/FarmSelect", dependencies=TRUE)
+
+* Error in RStudio even after installing XCode: "Could not find tools necessary to build FarmSelect": This is a known bug in RStudio. Try options(buildtools.check=function(action) TRUE) in RStudio to prevent RStudio from validating build tools.
+
 
 ##Functions
 
 There are two functions available. 
 
-* `farm.select`: The main function which carries out the entire model testing procedure.
+* `farm.select`: The main function which carries out the entire model testing procedure. Has its own print function.
 * `farm.res`: Adjusts the data for latent fators.
 
-Also see the [`farm.scree`](https://www.rdocumentation.org/packages/FarmTest/versions/1.0.0/topics/farm.scree) function in the [`FarmTest`](https://CRAN.R-project.org/package=FarmTest)
+Also see the [`farm.scree`](https://www.rdocumentation.org/packages/FarmTest/versions/1.0.0/topics/farm.scree) function in the [`FarmTest`](https://cran.r-project.org/package=FarmTest)
  package for how to generate diagnostic plots and output to evaluate the factor adjustment step.
 
 ## Main function example: model selection
@@ -68,7 +81,7 @@ Here we generate data from a factor model with 3 factors. We have 50 samples of 
 
 ```{r}
 library(FarmSelect)
-set.seed(100)
+set.seed(10)
 P = 200 #dimension
 N = 50 #samples
 K = 3 #nfactors
@@ -81,8 +94,11 @@ X = t(X)
 beta_1 = 3+3*runif(Q)
 beta = c(beta_1, rep(0,P-Q))
 eps = rnorm(N)
+eps = rt(N, 2.5)
+
 Y = X%*%beta+eps 
-output = farm.select(X,Y)
+output = farm.select(X,Y) #robust, no cross-validation
+output
 ```
 ```{r}
 names(output)
@@ -93,9 +109,16 @@ The values X.residual is the residual covariate matrix after adjusting for facto
 
 Now we use a different loss function for the model selection step, along with changing the number of factors.
 ```{r}
-output = farm.select(X,Y, loss = "mcp", K.factors = 10)
+farm.select(X,Y, loss = "mcp", K.factors = 10)
 ```
+The robustness is controlled by the parameter of the Huber loss function. This can be chosen by cross-validation which takes a long time, but gives good results. Altenratively, we supply our own parameter $C*sd*rate$ where $C$ is a constant, rate is the optimal rate for the tuning parameter. See Fan et al.(2017) <https://arxiv.org/abs/1612.08490>. $sd$ is the standard deviation of the residuals after running the OLS version of the Huber's estimator for the parameter to be estimated.   
 
+```{r}
+#examples of other robustification options
+output = farm.select(X,Y,robust = FALSE) #non-robust
+output = farm.select(X,Y, tau = 3) #robust, no cross-validation, specified tau
+#output = farm.select(X,Y, cv = TRUE) #robust, cross-validation, LONG RUNNING!!
+```
 For a logistic regression, we do the following: 
 ```{r}
 set.seed(100)
@@ -113,7 +136,6 @@ If known, we can provide this function (or the main function) the number of late
 output = farm.res(X, K.factors  = 30)
 ```
 We see a warning telling us that it is not a good idea to calculate 30 eigenvalues from a dataset that has only 50 samples. 
-
 
 
 ## Notes 

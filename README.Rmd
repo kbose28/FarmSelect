@@ -73,7 +73,7 @@ Help on the functions can be accessed by typing "?", followed by function name a
 
 There are two functions available. 
 
-* `farm.select`: The main function which carries out the entire model testing procedure.
+* `farm.select`: The main function which carries out the entire model testing procedure. Has its own print function.
 * `farm.res`: Adjusts the data for latent fators.
 
 Also see the [`farm.scree`](https://www.rdocumentation.org/packages/FarmTest/versions/1.0.0/topics/farm.scree) function in the [`FarmTest`](https://cran.r-project.org/package=FarmTest)
@@ -85,7 +85,7 @@ Here we generate data from a factor model with 3 factors. We have 50 samples of 
 
 ```{r}
 library(FarmSelect)
-set.seed(100)
+set.seed(10)
 P = 200 #dimension
 N = 50 #samples
 K = 3 #nfactors
@@ -98,8 +98,11 @@ X = t(X)
 beta_1 = 3+3*runif(Q)
 beta = c(beta_1, rep(0,P-Q))
 eps = rnorm(N)
+eps = rt(N, 2.5)
+
 Y = X%*%beta+eps 
-output = farm.select(X,Y)
+output = farm.select(X,Y) #robust, no cross-validation
+output
 ```
 ```{r}
 names(output)
@@ -110,9 +113,16 @@ The values X.residual is the residual covariate matrix after adjusting for facto
 
 Now we use a different loss function for the model selection step, along with changing the number of factors.
 ```{r}
-output = farm.select(X,Y, loss = "mcp", K.factors = 10)
+farm.select(X,Y, loss = "mcp", K.factors = 10)
 ```
+The robustness is controlled by the parameter of the Huber loss function. This can be chosen by cross-validation which takes a long time, but gives good results. Altenratively, we supply our own parameter $C*sd*rate$ where $C$ is a constant, rate is the optimal rate for the tuning parameter. See Fan et al.(2017) <https://arxiv.org/abs/1612.08490>. $sd$ is the standard deviation of the residuals after running the OLS version of the Huber's estimator for the parameter to be estimated.   
 
+```{r}
+#examples of other robustification options
+output = farm.select(X,Y,robust = FALSE) #non-robust
+output = farm.select(X,Y, tau = 3) #robust, no cross-validation, specified tau
+#output = farm.select(X,Y, cv = TRUE) #robust, cross-validation, LONG RUNNING!!
+```
 For a logistic regression, we do the following: 
 ```{r}
 set.seed(100)

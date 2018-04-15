@@ -5,7 +5,7 @@
 
 ## ------------------------------------------------------------------------
 library(FarmSelect)
-set.seed(100)
+set.seed(10)
 P = 200 #dimension
 N = 50 #samples
 K = 3 #nfactors
@@ -18,8 +18,11 @@ X = t(X)
 beta_1 = 3+3*runif(Q)
 beta = c(beta_1, rep(0,P-Q))
 eps = rnorm(N)
+eps = rt(N, 2.5)
+
 Y = X%*%beta+eps 
-output = farm.select(X,Y)
+output = farm.select(X,Y) #robust, no cross-validation
+output
 
 ## ------------------------------------------------------------------------
 names(output)
@@ -27,7 +30,13 @@ output$beta.chosen
 output$coef.chosen
 
 ## ------------------------------------------------------------------------
-output = farm.select(X,Y, loss = "mcp", K.factors = 10)
+farm.select(X,Y, loss = "mcp", K.factors = 10)
+
+## ------------------------------------------------------------------------
+#examples of other robustification options
+output = farm.select(X,Y,robust = FALSE) #non-robust
+output = farm.select(X,Y, tau = 3) #robust, no cross-validation, specified tau
+#output = farm.select(X,Y, cv = TRUE) #robust, cross-validation, LONG RUNNING!!
 
 ## ------------------------------------------------------------------------
 set.seed(100)

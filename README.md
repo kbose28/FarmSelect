@@ -58,7 +58,7 @@ Here we generate data from a factor model with 3 factors. We have 50 samples of 
 
 ``` r
 library(FarmSelect)
-set.seed(100)
+set.seed(10)
 P = 200 #dimension
 N = 50 #samples
 K = 3 #nfactors
@@ -71,14 +71,14 @@ X = t(X)
 beta_1 = 3+3*runif(Q)
 beta = c(beta_1, rep(0,P-Q))
 eps = rnorm(N)
+eps = rt(N, 2.5)
+
 Y = X%*%beta+eps 
-output = farm.select(Y,X)
-#> 
-#>  Call:
-#> farm.select(Y = Y, X = X)
+output = farm.select(X,Y) #robust, no cross-validation
+output
 #> 
 #>  Factor Adjusted Robust Model Selection 
-#> loss function used: mcp
+#> loss function used: scad
 #> 
 #> p = 200, n = 50
 #> factors found: 3
@@ -88,13 +88,12 @@ output = farm.select(Y,X)
 
 ``` r
 names(output)
-#> [1] "model.size"  "beta.chosen" "coef.chosen" "nfactors"    "X.residual"
+#> [1] "model.size"  "beta.chosen" "coef.chosen" "nfactors"    "X.residual" 
+#> [6] "p"           "n"           "robust"      "loss"
 output$beta.chosen
-#> V1 V2 V3 V4 V5 
-#>  1  2  3  4  5
+#> [1] 1 2 3 4 5
 output$coef.chosen
-#>       V1       V2       V3       V4       V5 
-#> 5.533703 4.181028 2.942731 4.744132 4.536507
+#> [1] 4.077835 5.377627 3.308710 5.640872 4.803159
 ```
 
 The values X.residual is the residual covariate matrix after adjusting for factors.
@@ -102,18 +101,21 @@ The values X.residual is the residual covariate matrix after adjusting for facto
 Now we use a different loss function for the model selection step, along with changing the number of factors.
 
 ``` r
-output = farm.select(Y,X, loss = "scad", K.factors = 10)
-#> 
-#>  Call:
-#> farm.select(Y = Y, X = X, loss = "scad", K.factors = 10)
+farm.select(X,Y, loss = "mcp", K.factors = 10)
 #> 
 #>  Factor Adjusted Robust Model Selection 
-#> loss function used: scad
+#> loss function used: mcp
 #> 
 #> p = 200, n = 50
 #> factors found: 10
 #> size of model selected:
-#>  6
+#>  7
+```
+
+``` r
+output = farm.select(X,Y,robust = FALSE) #non-robust
+output = farm.select(X,Y, tau = 3) #robust, no cross-validation, specified tau
+output = farm.select(X,Y, cv = TRUE) #robust, cross-validation, LONG RUNNING!!
 ```
 
 For a logistic regression, we do the following:
@@ -122,18 +124,7 @@ For a logistic regression, we do the following:
 set.seed(100)
 Prob = 1/(1+exp(-X%*%beta))
 Y = rbinom(N, 1, Prob)
-output = farm.select(Y,X, lin.reg=FALSE, loss = "lasso")
-#> 
-#>  Call:
-#> farm.select(Y = Y, X = X, loss = "lasso", lin.reg = FALSE)
-#> 
-#>  Factor Adjusted Robust Model Selection 
-#> loss function used: lasso
-#> 
-#> p = 200, n = 50
-#> factors found: 3
-#> size of model selected:
-#>  6
+output = farm.select(X,Y, lin.reg=FALSE, loss = "lasso")
 ```
 
 The function `farm.res` adjusts the dataset for latent factors. The number of factors is estimated internally by using the method in (Ahn and Horenstein 2013).

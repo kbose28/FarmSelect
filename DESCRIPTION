@@ -8,7 +8,7 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: true
 Imports: graphics, stats, grDevices, utils, methods, Rcpp, glmnet,
-        ncvreg
+        ncvreg, timeSeries
 URL: https://kbose28.github.io/FarmSelect/
 RoxygenNote: 6.0.1
 LinkingTo: Rcpp, RcppArmadillo
