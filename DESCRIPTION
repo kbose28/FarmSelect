@@ -1,6 +1,6 @@
 Package: FarmSelect
 Title: Factor Adjusted Robust Model Selection
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: c(person("Koushiki", "Bose", email = "bose@princeton.edu", role = c("aut", "cre")), person("Yuan", "Ke", email = "keyuan_princeton@163.com", role = "aut"),person("Kaizheng", "Wang", email = "kzwang2015@gmail.com", role = "aut"))
 Description: Implements a consistent model selection strategy for high dimensional sparse regression when the covariate dependence can be reduced through factor models. By separating the latent factors from idiosyncratic components, the problem is transformed from model selection with highly correlated covariates to that with weakly correlated variables. It is appropriate for cases where we have many variables compared to the number of samples. Moreover, it implements a robust procedure to estimate distribution parameters wherever possible, hence being suitable for cases when the underlying distribution deviates from Gaussianity. See the paper on the 'FarmSelect' method, Fan et al.(2017) <arXiv:1612.08490>, for detailed description of methods and further references. 
 Depends: R (>= 3.3.0)
@@ -8,7 +8,7 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: true
 Imports: graphics, stats, grDevices, utils, methods, Rcpp, glmnet,
-        ncvreg, timeSeries
+        ncvreg, fBasics
 URL: https://kbose28.github.io/FarmSelect/
 RoxygenNote: 6.0.1
 LinkingTo: Rcpp, RcppArmadillo

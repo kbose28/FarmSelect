@@ -121,7 +121,7 @@ The robustness is controlled by the parameter of the Huber loss function. This c
 #examples of other robustification options
 output = farm.select(X,Y,robust = FALSE) #non-robust
 output = farm.select(X,Y, tau = 3) #robust, no cross-validation, specified tau
-#output = farm.select(X,Y, cv = TRUE) #robust, cross-validation, LONG RUNNING!!
+output = farm.select(X,Y, cv = TRUE) #robust, cross-validation, LONG RUNNING!!
 ```
 For a logistic regression, we do the following: 
 ```{r}

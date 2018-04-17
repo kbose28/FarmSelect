@@ -12,7 +12,7 @@
 
 <meta name="author" content="Koushiki Bose" />
 
-<meta name="date" content="2018-04-15" />
+<meta name="date" content="2018-04-16" />
 
 <title>FarmSelect: Factor Adjusted Robust Model Selection</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">FarmSelect: Factor Adjusted Robust Model Selection</h1>
 <h4 class="author"><em>Koushiki Bose</em></h4>
-<h4 class="date"><em>2018-04-15</em></h4>
+<h4 class="date"><em>2018-04-16</em></h4>
 
 
 
@@ -149,7 +149,7 @@ output</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output<span class="op">$</span>beta.chosen</code></pre></div>
 <pre><code>## [1] 1 2 3 4 5</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output<span class="op">$</span>coef.chosen</code></pre></div>
-<pre><code>## [1] 4.077835 5.377627 3.308710 5.640872 4.803159</code></pre>
+<pre><code>## [1] 4.077831 5.377618 3.308705 5.640873 4.803170</code></pre>
 <p>The values X.residual is the residual covariate matrix after adjusting for factors.</p>
 <p>Now we use a different loss function for the model selection step, along with changing the number of factors.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">farm.select</span>(X,Y, <span class="dt">loss =</span> <span class="st">&quot;mcp&quot;</span>, <span class="dt">K.factors =</span> <span class="dv">10</span>)</code></pre></div>

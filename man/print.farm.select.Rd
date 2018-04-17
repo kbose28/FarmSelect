@@ -26,8 +26,8 @@ A list with the following items:
 Print method for \code{farm.select} objects
 }
 \examples{
-set.seed(100)
-P = 100 #dimension
+set.seed(10)
+P = 200 #dimension
 N = 50 #samples
 K = 3 #nfactors
 Q = 5 #model size

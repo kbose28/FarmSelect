@@ -40,7 +40,7 @@ The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal r
 }
 \examples{
 set.seed(100)
-P = 100 #dimension
+P = 200 #dimension
 N = 50 #samples
 K = 3 #nfactors
 Lambda = matrix(rnorm(P*K, 0,1), P,K)

@@ -1,13 +1,12 @@
 ---
 output: md_document
 ---
-## Update after fixing errors for Solaris
+## Update adding some options
 
 ## Test environments
 * local OS X install, R 3.3.2
 * Ubuntu 14.04 (on Travis-CI), R 3.3.2
 * win_builder (devel and release)
-* Oracle Solaris 10 x86 (using Solaris VMware)
 
 
 ## R CMD check results

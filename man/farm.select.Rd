@@ -50,8 +50,7 @@ For formula of how the covariates are  adjusted for latent factors, see Section 
 The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate } is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the residual of running the OLS version of the Huber's estimator for the parameter to be estimated.
 }
 \examples{
-set.seed(100)
-P = 100 #dimension
+P = 200 #dimension
 N = 50 #samples
 K = 3 #nfactors
 Q = 5 #model size
@@ -82,7 +81,6 @@ output = farm.select(X, Y,loss = "mcp", K.factors = 4)
 Prob = 1/(1+exp(-X\%*\%beta))
 Y = rbinom(N, 1, Prob)
 output = farm.select(X, Y,lin.reg=FALSE, loss = "lasso")
-
 }
 \references{
 Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/abs/1612.08490}

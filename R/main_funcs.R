@@ -1,7 +1,7 @@
 #' @useDynLib FarmSelect
 #' @importFrom Rcpp sourceCpp
 #' @importFrom graphics mtext plot points axis par barplot
-#' @importFrom timeSeries colSds
+#' @importFrom fBasics rowSds
 #' @import methods
 #' @import utils
 #' @import grDevices
@@ -37,8 +37,7 @@ NULL
 #' @details For formula of how the covariates are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
 #' @details The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate } is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the residual of running the OLS version of the Huber's estimator for the parameter to be estimated.
 #' @examples
-#' set.seed(100)
-#' P = 100 #dimension
+#' P = 200 #dimension
 #' N = 50 #samples
 #' K = 3 #nfactors
 #' Q = 5 #model size
@@ -69,7 +68,6 @@ NULL
 #' Prob = 1/(1+exp(-X%*%beta))
 #' Y = rbinom(N, 1, Prob)
 #' output = farm.select(X, Y,lin.reg=FALSE, loss = "lasso")
-#'
 #' @seealso \code{\link{print.farm.select}}
 #' @references Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/abs/1612.08490}
 #' @export
@@ -103,8 +101,8 @@ farm.select <- function ( X, Y, loss=c( "scad","mcp", "lasso"),  robust = TRUE, 
 #' @seealso \code{\link{farm.select}}
 #'
 #' @examples
-#' set.seed(100)
-#' P = 100 #dimension
+#' set.seed(10)
+#' P = 200 #dimension
 #' N = 50 #samples
 #' K = 3 #nfactors
 #' Q = 5 #model size
@@ -148,12 +146,11 @@ farm.select.adjusted <- function (X,  Y,  loss,robust ,cv=cv,tau, lin.reg,K.fact
         X.mean = mu_robust_F(matrix(X,p,n), matrix(rep(1,n),n,1))
         X = sweep(X, 1,X.mean,"-")
         }else{
-          if(lin.reg==TRUE){OLS_rsd = lm(Y~1)$residuals
-            CT = tau*sd(OLS_rsd)*max(sqrt(n/log(n)))#??????RATE????
+          if(lin.reg==TRUE){
+            CT = tau*sd(Y)*max(sqrt(n/log(n)))#??????RATE????
             Y.mean = mu_robust_F_noCV(matrix(Y,1,n), matrix(rep(1,n),n,1), matrix(CT,1,1))
             Y=Y-rep(Y.mean,n)}
-            OLS_rsd = apply(X, 2, function(x) lm(x~1)$residuals)
-            CT = tau*colSds(OLS_rsd)*max(sqrt(n/log(p*n)))
+            CT = tau*rowSds(X)*max(sqrt(n/log(p*n)))
             X.mean = mu_robust_F_noCV(matrix(X,p,n), matrix(rep(1,n),n,1), matrix(CT, p,1))
             X = sweep(X, 1,X.mean,"-")}
   }else{
@@ -206,8 +203,7 @@ farm.adjust<- function( X ,Y , robust ,cv=cv,tau  = tau,  lin.reg,K.factors ) {#
         for (j in 1:p){
           Xi = X[i,]
           Xj = X[j,]
-          OLS_rsd =lm(Xi*Xj~1)$residuals
-          CT[i,j] = tau*sd(OLS_rsd)*max(sqrt(n/log((p^2)*n)))}}
+          CT[i,j] = tau*sd(Xi*Xj)*max(sqrt(n/log((p^2)*n)))}}
       covx =  Cov_Huber_noCV(matrix((X),p,n),  matrix(rep(1,n),n,1), matrix(CT,p,p))
       eigs = Eigen_Decomp(covx)
       values = eigs[,p+1]
@@ -369,7 +365,7 @@ farm.select.temp<- function( X.res,Y.res,loss, max.iter, nfolds ,factors = NULL)
 #' @details The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate} is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the residual of running the OLS version of the Huber's estimator for the parameter to be estimated.
 #' @examples
 #' set.seed(100)
-#' P = 100 #dimension
+#' P = 200 #dimension
 #' N = 50 #samples
 #' K = 3 #nfactors
 #' Lambda = matrix(rnorm(P*K, 0,1), P,K)
@@ -390,14 +386,12 @@ farm.res<- function(X ,K.factors = NULL, robust = TRUE, cv=FALSE, tau = 2) {
   n = NCOL(X)
   if(min(n,p)<=4) stop('\n n and p must be at least 4 \n')
 
-
-
   if(robust ==TRUE){
     if(cv==TRUE){
     X.mean = mu_robust_F_noCV(matrix(X,p,n), matrix(rep(1,n),n,1))
     X = sweep(X, 1,X.mean,"-")
-    }else{OLS_rsd = apply(X, 2, function(x) lm(x~1)$residuals)
-       CT = tau*colSds(OLS_rsd)*max(sqrt(n/log(p*n)))
+    }else{
+       CT = tau*rowSds(X)*max(sqrt(n/log(p*n)))
       X.mean = mu_robust_F_noCV(matrix(X,p,n), matrix(rep(1,n),n,1), matrix(CT, p,1))
       X = sweep(X, 1,X.mean,"-")
     }
@@ -418,8 +412,7 @@ farm.res<- function(X ,K.factors = NULL, robust = TRUE, cv=FALSE, tau = 2) {
      for (j in 1:p){
        Xi = X[i,]
        Xj = X[j,]
-       OLS_rsd =lm(Xi*Xj~1)$residuals
-       CT[i,j] = tau*sd(OLS_rsd)*max(sqrt(n/log((p^2)*n)))}}
+       CT[i,j] = tau*sd(Xi*Xj)*max(sqrt(n/log((p^2)*n)))}}
     covx =  Cov_Huber_noCV(matrix((X),p,n),  matrix(rep(1,n),n,1), matrix(CT,p,p))
     eigs = Eigen_Decomp(covx)
     values = eigs[,p+1]
