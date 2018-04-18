@@ -6,7 +6,7 @@
 \usage{
 farm.select(X, Y, loss = c("scad", "mcp", "lasso"), robust = TRUE,
   cv = FALSE, tau = 2, lin.reg = TRUE, K.factors = NULL,
-  max.iter = 10000, nfolds = ceiling(length(Y)/3))
+  max.iter = 10000, nfolds = ceiling(length(Y)/3), verbose = TRUE)
 }
 \arguments{
 \item{X}{an n x p covariate matrix with each row being a sample. Must have same number of rows as the size of \code{Y}.}
@@ -19,7 +19,7 @@ farm.select(X, Y, loss = c("scad", "mcp", "lasso"), robust = TRUE,
 
 \item{cv}{a boolean, specifying whether or  not to run cross-validation for the tuning parameter. Default is FALSE. Only used if \code{robust} is TRUE.}
 
-\item{tau}{multiplier for the tuning parameter for Huber loss function. Default is 2. Only used if \code{robust} is TRUE and \code{cv} is FALSE}
+\item{tau}{\code{>0}, multiplier for the tuning parameter for Huber loss function. Default is 2. Only used if \code{robust} is TRUE and \code{cv} is FALSE. See details.}
 
 \item{lin.reg}{a boolean, specifying whether or not to assume that we have a linear regression model (TRUE) or a logit model (FALSE) structure. Default is TRUE.}
 
@@ -28,6 +28,8 @@ farm.select(X, Y, loss = c("scad", "mcp", "lasso"), robust = TRUE,
 \item{max.iter}{maximum number of iterations across the regularization path. Default is 10000.}
 
 \item{nfolds}{the number of cross-validation folds. Default is ceiling(samplesize/3).}
+
+\item{verbose}{a boolean specifying whether to print runtime updates to the console. Default is TRUE.}
 }
 \value{
 A list with the following items
@@ -47,9 +49,12 @@ For details about the method, see Fan et al.(2017).
 
 For formula of how the covariates are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
 
-The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate } is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the residual of running the OLS version of the Huber's estimator for the parameter to be estimated.
+The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate } is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the data.
+
+\code{\link{ncvreg}} is used to fit the model after decorrelation. This package may output its own warnings about failures to converge and model saturation.
 }
 \examples{
+set.seed(10)
 P = 200 #dimension
 N = 50 #samples
 K = 3 #nfactors
@@ -59,7 +64,7 @@ F = matrix(rnorm(N*K, 0,1), N,K)
 U = matrix(rnorm(P*N, 0,1), P,N)
 X = Lambda\%*\%t(F)+U
 X = t(X)
-beta_1 = 3+3*runif(Q)
+beta_1 = rep(3,Q)
 beta = c(beta_1, rep(0,P-Q))
 eps = rnorm(N)
 Y = X\%*\%beta+eps
@@ -86,5 +91,5 @@ output = farm.select(X, Y,lin.reg=FALSE, loss = "lasso")
 Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/abs/1612.08490}
 }
 \seealso{
-\code{\link{print.farm.select}}
+\code{\link{print.farm.select}} \code{\link{farm.res}}
 }

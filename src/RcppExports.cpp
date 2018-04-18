@@ -138,6 +138,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// Cov_Huber_tune
+arma::mat Cov_Huber_tune(arma::mat X, float tau);
+RcppExport SEXP _FarmSelect_Cov_Huber_tune(SEXP XSEXP, SEXP tauSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< float >::type tau(tauSEXP);
+    rcpp_result_gen = Rcpp::wrap(Cov_Huber_tune(X, tau));
+    return rcpp_result_gen;
+END_RCPP
+}
 // Cov_Huber_noCV
 arma::mat Cov_Huber_noCV(arma::mat X, arma::mat phi, arma::mat tau);
 RcppExport SEXP _FarmSelect_Cov_Huber_noCV(SEXP XSEXP, SEXP phiSEXP, SEXP tauSEXP) {
@@ -268,6 +280,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_FarmSelect_mu_robust_F_noCV", (DL_FUNC) &_FarmSelect_mu_robust_F_noCV, 3},
     {"_FarmSelect_mu_robust_F", (DL_FUNC) &_FarmSelect_mu_robust_F, 2},
     {"_FarmSelect_Cov_Huber", (DL_FUNC) &_FarmSelect_Cov_Huber, 2},
+    {"_FarmSelect_Cov_Huber_tune", (DL_FUNC) &_FarmSelect_Cov_Huber_tune, 2},
     {"_FarmSelect_Cov_Huber_noCV", (DL_FUNC) &_FarmSelect_Cov_Huber_noCV, 3},
     {"_FarmSelect_Find_factors", (DL_FUNC) &_FarmSelect_Find_factors, 5},
     {"_FarmSelect_Find_PF", (DL_FUNC) &_FarmSelect_Find_PF, 2},

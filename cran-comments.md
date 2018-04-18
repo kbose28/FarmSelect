@@ -1,5 +1,5 @@
-Update after fixing errors for Solaris
---------------------------------------
+Update adding some options
+--------------------------
 
 Test environments
 -----------------
@@ -7,20 +7,11 @@ Test environments
 -   local OS X install, R 3.3.2
 -   Ubuntu 14.04 (on Travis-CI), R 3.3.2
 -   win\_builder (devel and release)
--   Oracle Solaris 10 x86 (using Solaris VMware)
 
 R CMD check results
 -------------------
 
--There were NO ERRORs or WARNINGs.
-
--1 NOTE
-
-Possibly mis-spelled words in DESCRIPTION:
-
-Gaussianity (5:626) al (5:688) arXiv (5:699) et (5:685)
-
-These words are spelled correctly.
+-There were NO ERRORs, WARNINGs or NOTEs.
 
 Downstream dependencies
 -----------------------

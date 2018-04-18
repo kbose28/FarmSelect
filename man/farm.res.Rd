@@ -4,7 +4,8 @@
 \alias{farm.res}
 \title{Adjusting a data matrix for underlying factors}
 \usage{
-farm.res(X, K.factors = NULL, robust = TRUE, cv = FALSE, tau = 2)
+farm.res(X, K.factors = NULL, robust = TRUE, cv = FALSE, tau = 2,
+  verbose = TRUE)
 }
 \arguments{
 \item{X}{an n x p data matrix with each row being a sample.}
@@ -15,7 +16,9 @@ farm.res(X, K.factors = NULL, robust = TRUE, cv = FALSE, tau = 2)
 
 \item{cv}{a boolean, specifying whether or  not to run cross-validation for the tuning parameter. Default is FALSE. Only used if \code{robust} is TRUE.}
 
-\item{tau}{multiplier for the tuning parameter for Huber loss function. Default is 2. Only used if \code{robust} is TRUE and \code{cv} is FALSE}
+\item{tau}{multiplier for the tuning parameter for Huber loss function. Default is 2. Only used if \code{robust} is TRUE and \code{cv} is FALSE. See details.}
+
+\item{verbose}{a boolean specifying whether to print runtime updates to the console. Default is TRUE.}
 }
 \value{
 A list with the following items
@@ -36,7 +39,7 @@ Number of rows and columns of the data matrix must be at least 4 in order to be 
 
 Number of latent factors, if not provided, is estimated by the eignevalue ratio test. See Ahn and Horenstein(2013).
 
-The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate} is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the residual of running the OLS version of the Huber's estimator for the parameter to be estimated.
+The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate} is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the data.
 }
 \examples{
 set.seed(100)
@@ -57,4 +60,7 @@ names(output) #list of output
 Ahn, S. C., and A. R. Horenstein (2013): "Eigenvalue Ratio Test for the Number of Factors," Econometrica, 81 (3), 1203–1227.
 
 Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/abs/1612.08490}
+}
+\seealso{
+\code{\link{farm.select}}
 }

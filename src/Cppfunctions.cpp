@@ -302,6 +302,40 @@ arma::mat Cov_Huber( arma::mat X, arma::mat phi)
 }
 
 
+//Output: Estimated tuning parameter for covriance matrix
+// [[Rcpp::export]]
+arma::mat Cov_Huber_tune( arma::mat X, float tau)
+{
+  using namespace arma;
+  int i, j, P=X.n_rows, N=X.n_cols;
+
+  //Tuning parameter
+  float tautemp;
+
+  //Define the matrices
+  mat Xi, Xj;
+  mat CT; CT.zeros(P,P);
+  mat Z; Z.ones(N);
+  mat sd;
+
+  // Entry-wise Huber method
+  for(i=0;i<P;i++){
+    Rcpp::checkUserInterrupt();
+    for(j=0;j<=i;j++){
+      Xi=X.row(i); Xj=X.row(j);
+      Z = Xi%Xj;
+      sd = arma::stddev(Z,1,1);
+      tautemp  = N/log(static_cast<double>((P^2)*N));
+      CT(i,j) = tau*(sd(0,0)*sqrt(static_cast<double>(tautemp)));
+      //cout << CT(i,j);
+      CT(j,i)=CT(i,j);
+    }
+  }
+
+  return CT;
+
+}
+
 //Output: Estimated cov matrix Sigma_hat
 // [[Rcpp::export]]
 arma::mat Cov_Huber_noCV( arma::mat X, arma::mat phi, arma::mat tau)

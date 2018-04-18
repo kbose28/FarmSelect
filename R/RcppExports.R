@@ -41,6 +41,10 @@ Cov_Huber <- function(X, phi) {
     .Call('_FarmSelect_Cov_Huber', PACKAGE = 'FarmSelect', X, phi)
 }
 
+Cov_Huber_tune <- function(X, tau) {
+    .Call('_FarmSelect_Cov_Huber_tune', PACKAGE = 'FarmSelect', X, tau)
+}
+
 Cov_Huber_noCV <- function(X, phi, tau) {
     .Call('_FarmSelect_Cov_Huber_noCV', PACKAGE = 'FarmSelect', X, phi, tau)
 }
