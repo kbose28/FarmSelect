@@ -41,16 +41,19 @@ A list with the following items
 \item{coef.chosen}{the coefficients of the chosen covariates}
 \item{X.residual}{the residual covariate matrix after adjusting for factors}
 \item{nfactors}{number of (estimated) factors}
+\item{n}{number of observations}
+\item{p}{number of dimensions}
+\item{robust}{whether robust parameters were used}
+\item{loss}{loss function used}
+#' @details Number of rows and columns of the covariate matrix must be at least 4 in order to be able to calculate latent factors.
 }
 \description{
 Given a covariate matrix and output vector, this function first adjusts the covariates for underlying factors and then performs model selection.
 }
 \details{
-Number of rows and columns of the covariate matrix must be at least 4 in order to be able to calculate latent factors.
-
 For formula of how the covariates are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
 
-The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate } is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the data.
+The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate } is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). \code{sigma} is the standard deviation of the data.
 
 \code{\link{ncvreg}} is used to fit the model after decorrelation. This package may output its own warnings about failures to converge and model saturation.
 }
@@ -102,7 +105,7 @@ eps = rnorm(N)
 Prob = 1/(1+exp(-X\%*\%beta))
 Y = rbinom(N, 1, Prob)
 
-output = farm.select(X,Y, lin.reg=FALSE, eps=1e-3, verbose=FALSE)
+output = farm.select(X,Y, lin.reg=FALSE, eps=1e-3)
 output$beta.chosen
 output$coef.chosen
 }

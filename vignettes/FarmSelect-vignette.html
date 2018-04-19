@@ -163,7 +163,7 @@ output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y) <span 
 ## factors found: 10
 ## size of model selected:
 ##  10</code></pre>
-<p>The robustness is controlled by the parameter of the Huber loss function. This can be chosen by cross-validation which takes a long time, but gives good results. Altenratively, we use the parameter <span class="math inline">\(tau*sd*rate\)</span> where tau is a constant, rate is the optimal rate for the tuning parameter (see Fan et al.(2017) <a href="https://arxiv.org/abs/1612.08490" class="uri">https://arxiv.org/abs/1612.08490</a>). sd is the standard deviation of the data at hand. The value of <span class="math inline">\(tau\)</span> can be supplied by the user and takes a default value of 2.</p>
+<p>The robustness is controlled by the parameter of the Huber loss function. This can be chosen by cross-validation which takes a long time, but gives good results. Alternatively, we use the parameter <span class="math inline">\(tau*sd*rate\)</span> where tau is a constant, rate is the optimal rate for the tuning parameter (see Fan et al.(2017) <a href="https://arxiv.org/abs/1612.08490" class="uri">https://arxiv.org/abs/1612.08490</a>). sd is the standard deviation of the data at hand. The value of <span class="math inline">\(tau\)</span> can be supplied by the user and takes a default value of 2.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">##examples of other robustification options
 output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y,<span class="dt">robust =</span> <span class="ot">FALSE</span>, <span class="dt">verbose=</span><span class="ot">FALSE</span>) <span class="co">#non-robust</span>
 output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y, <span class="dt">tau =</span> <span class="dv">3</span>, <span class="dt">verbose=</span><span class="ot">FALSE</span>) <span class="co">#robust, no cross-validation, specified tau</span>
@@ -194,7 +194,10 @@ eps =<span class="st"> </span><span class="kw">rnorm</span>(N)
 
 Prob =<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(<span class="op">-</span>X<span class="op">%*%</span>beta))
 Y =<span class="st"> </span><span class="kw">rbinom</span>(N, <span class="dv">1</span>, Prob)
-output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y, <span class="dt">lin.reg=</span><span class="ot">FALSE</span>, <span class="dt">eps=</span><span class="fl">1e-3</span>, <span class="dt">verbose=</span><span class="ot">FALSE</span>)</code></pre></div>
+output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y, <span class="dt">lin.reg=</span><span class="ot">FALSE</span>, <span class="dt">eps=</span><span class="fl">1e-3</span>)</code></pre></div>
+<pre><code>## calculating tuning parameters...
+## calculating covariance matrix...
+## fitting model...</code></pre>
 </div>
 <div id="notes" class="section level2">
 <h2>Notes</h2>

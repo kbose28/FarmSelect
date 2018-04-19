@@ -54,7 +54,7 @@ Also see the [`farm.scree`](https://www.rdocumentation.org/packages/FarmTest/ver
 Main function example: model selection
 --------------------------------------
 
-Here we generate data from a factor model with 3 factors. We have 50 samples of 200 dimensional data. The model is of size 3, where the first 3 covariate coefficients are 5 and the rest zero. The factors and loadings are generated from a normal distribution. The errors are geenrated from a *t* distribution with 2.5 degrees of freedom.
+Here we generate 50 samples of 200 dimensional data from a factor model with 3 factors. The model is of size 3, where the first 3 covariate coefficients are 5 and the rest zero. The factors and loadings are generated from a normal distribution. The errors are geenrated from a *t* distribution with 2.5 degrees of freedom.
 
 ``` r
 library(FarmSelect)
@@ -141,12 +141,12 @@ output = farm.res(X, K.factors  = 30, verbose=FALSE)
 
 We see a warning telling us that it is not a good idea to calculate 30 eigenvalues from a dataset that has only 50 samples.
 
-For a logistic regression, we prefer a larger sample size: Here we generate data from a factor model with 3 factors. We have 200 samples of 300 dimensional data. The model is of size 3, where the first 3 covariate coefficients are 5 and the rest zero. The factors, loadings, errors are all generated from a normal distribution.
+For a logistic regression, we prefer a larger sample size: Here we generate 200 samples of 300 dimensional data from a factor model with 3 factors. The model is of size 3, where the first 3 covariate coefficients are 5 and the rest zero. The factors, loadings, errors are all generated from a normal distribution.
 
 ``` r
 set.seed(100)
-P = 250 #dimension
-N = 200 #samples
+P = 400 #dimension
+N = 300 #samples
 K = 3 #nfactors
 Q = 3 #model size
 Lambda = matrix(rnorm(P*K, 0,1), P,K)
@@ -160,8 +160,10 @@ eps = rnorm(N)
 
 Prob = 1/(1+exp(-X%*%beta))
 Y = rbinom(N, 1, Prob)
-output = farm.select(X,Y, lin.reg=FALSE, verbose=FALSE, eps=1e-3)
-#> Warning in ncvreg(X = X, y = y, ...): Maximum number of iterations reached
+output = farm.select(X,Y, lin.reg=FALSE, eps=1e-3)
+#> calculating tuning parameters...
+#> calculating covariance matrix...
+#> fitting model...
 ```
 
 Notes

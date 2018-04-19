@@ -33,9 +33,13 @@ NULL
 #' \item{coef.chosen}{the coefficients of the chosen covariates}
 #' \item{X.residual}{the residual covariate matrix after adjusting for factors}
 #' \item{nfactors}{number of (estimated) factors}
-#' @details Number of rows and columns of the covariate matrix must be at least 4 in order to be able to calculate latent factors.
+#' \item{n}{number of observations}
+#' \item{p}{number of dimensions}
+#' \item{robust}{whether robust parameters were used}
+#' \item{loss}{loss function used}
+#' #' @details Number of rows and columns of the covariate matrix must be at least 4 in order to be able to calculate latent factors.
 #' @details For formula of how the covariates are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
-#' @details The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate } is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the data.
+#' @details The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate } is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). \code{sigma} is the standard deviation of the data.
 #' @details \code{\link{ncvreg}} is used to fit the model after decorrelation. This package may output its own warnings about failures to converge and model saturation.
 #' @examples
 #' ##linear regression
@@ -85,7 +89,7 @@ NULL
 #' Prob = 1/(1+exp(-X%*%beta))
 #' Y = rbinom(N, 1, Prob)
 #'
-#' output = farm.select(X,Y, lin.reg=FALSE, eps=1e-3, verbose=FALSE)
+#' output = farm.select(X,Y, lin.reg=FALSE, eps=1e-3)
 #' output$beta.chosen
 #' output$coef.chosen
 #' }
@@ -120,6 +124,7 @@ farm.select <- function ( X, Y, loss=c( "scad","mcp", "lasso"),  robust = TRUE, 
 #' \item{n}{number of observations}
 #' \item{p}{number of dimensions}
 #' \item{robust}{whether robust parameters were used}
+#' \item{loss}{loss function used}
 #' @seealso \code{\link{farm.select}}
 #'
 #' @examples
@@ -168,10 +173,10 @@ farm.select.adjusted <- function (X,  Y,  loss,robust ,cv=cv,tau, lin.reg,K.fact
         X = sweep(X, 1,X.mean,"-")
         }else{
          if(lin.reg==TRUE){
-            CT = tau*sd(Y)*max(sqrt(n/log(n)))#??????RATE????
+            CT = tau*sd(Y)*sqrt(n/log(n))
             Y.mean = mu_robust_F_noCV(matrix(Y,1,n), matrix(rep(1,n),n,1), matrix(CT,1,1))
             Y=Y-rep(Y.mean,n)}
-            CT = tau*rowSds(X)*max(sqrt(n/log(p*n)))
+            CT = tau*rowSds(X)*sqrt(n/log(p*n))
             X.mean = mu_robust_F_noCV(matrix(X,p,n), matrix(rep(1,n),n,1), matrix(CT, p,1))
             X = sweep(X, 1,X.mean,"-")}
   }else{
@@ -382,10 +387,10 @@ farm.select.temp<- function( X.res,Y.res,loss, max.iter, nfolds ,eps,factors = N
 #' \item{factors}{estimated factors}
 #' \item{nfactors}{the number of (estimated) factors}
 #' @details For details about the method, see Fan et al.(2017).
-#' @details Using \code{robust.cov = TRUE} uses the Huber's loss to estimate the covariance matrix. For details of covariance estimation method see Fan et al.(2017).
+#' @details Using \code{robust = TRUE} uses the Huber's loss to estimate parameters robustly. For details of covariance estimation method see Fan et al.(2017).
 #' @details Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
 #' @details Number of latent factors, if not provided, is estimated by the eignevalue ratio test. See Ahn and Horenstein(2013). The maximum number is taken to be min(n,p)/2. User can supply a larger number is desired.
-#' @details The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate} is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the data.
+#' @details The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate} is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). \code{sigma} is the standard deviation of the data.
 #' @seealso \code{\link{farm.select}}
 #' @examples
 #' set.seed(100)

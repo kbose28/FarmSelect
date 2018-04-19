@@ -33,13 +33,13 @@ Given a matrix of covariates, this function estimates the underlying factors and
 \details{
 For details about the method, see Fan et al.(2017).
 
-Using \code{robust.cov = TRUE} uses the Huber's loss to estimate the covariance matrix. For details of covariance estimation method see Fan et al.(2017).
+Using \code{robust = TRUE} uses the Huber's loss to estimate parameters robustly. For details of covariance estimation method see Fan et al.(2017).
 
 Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
 
 Number of latent factors, if not provided, is estimated by the eignevalue ratio test. See Ahn and Horenstein(2013). The maximum number is taken to be min(n,p)/2. User can supply a larger number is desired.
 
-The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate} is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the data.
+The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate} is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). \code{sigma} is the standard deviation of the data.
 }
 \examples{
 set.seed(100)

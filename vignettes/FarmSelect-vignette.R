@@ -61,5 +61,5 @@ eps = rnorm(N)
 
 Prob = 1/(1+exp(-X%*%beta))
 Y = rbinom(N, 1, Prob)
-output = farm.select(X,Y, lin.reg=FALSE, eps=1e-3, verbose=FALSE)
+output = farm.select(X,Y, lin.reg=FALSE, eps=1e-3)
 

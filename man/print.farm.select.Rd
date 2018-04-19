@@ -21,6 +21,7 @@ A list with the following items:
 \item{n}{number of observations}
 \item{p}{number of dimensions}
 \item{robust}{whether robust parameters were used}
+\item{loss}{loss function used}
 }
 \description{
 Print method for \code{farm.select} objects
