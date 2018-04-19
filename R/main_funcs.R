@@ -6,7 +6,6 @@
 #' @import utils
 #' @import grDevices
 #' @import stats
-#' @import glmnet
 #' @import ncvreg
 
 NULL
@@ -26,6 +25,7 @@ NULL
 #' @param K.factors number of factors to be estimated. Otherwise estimated internally. K>0.
 #' @param max.iter maximum number of iterations across the regularization path. Default is 10000.
 #' @param nfolds the number of cross-validation folds. Default is ceiling(samplesize/3).
+#' @param eps Convergence threshhold for model fitting using \code{\link{ncvreg}}. The algorithm iterates until the RMSD for the change in linear predictors for any coefficient is less than eps. Default is \code{1e-4}.
 #' @param verbose a boolean specifying whether to print runtime updates to the console. Default is TRUE.
 #' @return A list with the following items
 #' \item{model.size}{the size of the model}
@@ -34,24 +34,24 @@ NULL
 #' \item{X.residual}{the residual covariate matrix after adjusting for factors}
 #' \item{nfactors}{number of (estimated) factors}
 #' @details Number of rows and columns of the covariate matrix must be at least 4 in order to be able to calculate latent factors.
-#' @details For details about the method, see Fan et al.(2017).
 #' @details For formula of how the covariates are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
 #' @details The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate } is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the data.
 #' @details \code{\link{ncvreg}} is used to fit the model after decorrelation. This package may output its own warnings about failures to converge and model saturation.
 #' @examples
-#' set.seed(10)
+#' ##linear regression
+#' set.seed(100)
 #' P = 200 #dimension
 #' N = 50 #samples
 #' K = 3 #nfactors
-#' Q = 5 #model size
+#' Q = 3 #model size
 #' Lambda = matrix(rnorm(P*K, 0,1), P,K)
 #' F = matrix(rnorm(N*K, 0,1), N,K)
 #' U = matrix(rnorm(P*N, 0,1), P,N)
 #' X = Lambda%*%t(F)+U
 #' X = t(X)
-#' beta_1 = rep(3,Q)
+#' beta_1 = rep(5,Q)
 #' beta = c(beta_1, rep(0,P-Q))
-#' eps = rnorm(N)
+#' eps = rt(N, 2.5)
 #' Y = X%*%beta+eps
 #'
 #' ##with default options
@@ -67,20 +67,38 @@ NULL
 #' ##changing the loss function and inputting factors
 #' output = farm.select(X, Y,loss = "mcp", K.factors = 4)
 #'
-#' ##use a logistic regression model
+#' ##use a logistic regression model, a larger sample size is desired.
+#' \dontrun{
+#' set.seed(100)
+#' P = 400 #dimension
+#' N = 300 #samples
+#' K = 3 #nfactors
+#' Q = 3 #model size
+#' Lambda = matrix(rnorm(P*K, 0,1), P,K)
+#' F = matrix(rnorm(N*K, 0,1), N,K)
+#' U = matrix(rnorm(P*N, 0,1), P,N)
+#' X = Lambda%*%t(F)+U
+#' X = t(X)
+#' beta_1 = rep(5, Q)
+#' beta = c(beta_1, rep(0,P-Q))
+#' eps = rnorm(N)
 #' Prob = 1/(1+exp(-X%*%beta))
 #' Y = rbinom(N, 1, Prob)
-#' output = farm.select(X, Y,lin.reg=FALSE, loss = "lasso")
+#'
+#' output = farm.select(X,Y, lin.reg=FALSE, eps=1e-3, verbose=FALSE)
+#' output$beta.chosen
+#' output$coef.chosen
+#' }
 #' @seealso \code{\link{print.farm.select}} \code{\link{farm.res}}
 #' @references Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/abs/1612.08490}
 #' @export
-farm.select <- function ( X, Y, loss=c( "scad","mcp", "lasso"),  robust = TRUE, cv = FALSE, tau = 2 ,  lin.reg = TRUE,K.factors= NULL,max.iter=10000, nfolds=ceiling(length(Y)/3), verbose=TRUE){
+farm.select <- function ( X, Y, loss=c( "scad","mcp", "lasso"),  robust = TRUE, cv = FALSE, tau = 2 ,  lin.reg = TRUE,K.factors= NULL,max.iter=10000, nfolds=ceiling(length(Y)/3), eps =1e-4,verbose=TRUE){
   loss=match.arg(loss)
   #error checking
   X = t(X)
   if(tau<=0) stop('tau should be a positive number')
   if(NCOL(X)!=NROW(Y)) stop('number of rows in covariate matrix should be size of the outcome vector')
-  output.final = farm.select.adjusted( X, Y,  loss=match.arg(loss), robust=robust,cv=cv, tau=tau, lin.reg=lin.reg,K.factors=K.factors, max.iter = max.iter, nfolds = nfolds, verbose=verbose)
+  output.final = farm.select.adjusted( X, Y,  loss=match.arg(loss), robust=robust,cv=cv, tau=tau, lin.reg=lin.reg,K.factors=K.factors, max.iter = max.iter, nfolds = nfolds,eps=eps, verbose=verbose)
   output = (output.final)
   attr(output, "class") <- "farm.select"
   output
@@ -105,25 +123,24 @@ farm.select <- function ( X, Y, loss=c( "scad","mcp", "lasso"),  robust = TRUE, 
 #' @seealso \code{\link{farm.select}}
 #'
 #' @examples
-#' set.seed(10)
+#' set.seed(100)
 #' P = 200 #dimension
 #' N = 50 #samples
 #' K = 3 #nfactors
-#' Q = 5 #model size
+#' Q = 3 #model size
 #' Lambda = matrix(rnorm(P*K, 0,1), P,K)
 #' F = matrix(rnorm(N*K, 0,1), N,K)
 #' U = matrix(rnorm(P*N, 0,1), P,N)
 #' X = Lambda%*%t(F)+U
 #' X = t(X)
-#' beta_1 = rep(3,Q)
+#' beta_1 = rep(5,Q)
 #' beta = c(beta_1, rep(0,P-Q))
-#' eps = rnorm(N)
+#' eps = rt(N, 2.5)
 #' Y = X%*%beta+eps
 #'
 #' ##with default options
 #' output = farm.select(X,Y)
 #' output
-#' names(output)
 #' @export
 print.farm.select<-function(x,...){
   cat(paste("\n Factor Adjusted",if(x$robust) "Robust", "Model Selection \n"))
@@ -139,7 +156,7 @@ print.farm.select<-function(x,...){
 ###################################################################################
 ## main function: not for end user
 ###################################################################################
-farm.select.adjusted <- function (X,  Y,  loss,robust ,cv=cv,tau, lin.reg,K.factors, max.iter, nfolds,verbose){
+farm.select.adjusted <- function (X,  Y,  loss,robust ,cv=cv,tau, lin.reg,K.factors, max.iter, nfolds,eps,verbose){
   n = length(Y)
   p = NROW(X)
 
@@ -176,10 +193,10 @@ farm.select.adjusted <- function (X,  Y,  loss,robust ,cv=cv,tau, lin.reg,K.fact
   X.residual = output.adjust$X.residual
   #perform model selection
   if(lin.reg){
-    output.chosen = farm.select.temp ( X.res,Y.res,  loss,max.iter, nfolds)
+    output.chosen = farm.select.temp ( X.res,Y.res,  loss,max.iter, nfolds, eps)
   }else{
     F_hat =  output.adjust$F_hat
-    output.chosen = farm.select.temp (  X.res,Y.res, loss,max.iter, nfolds, factors = F_hat)
+    output.chosen = farm.select.temp (  X.res,Y.res, loss,max.iter, nfolds, eps,factors = F_hat)
   }
 
   #list all the output
@@ -254,14 +271,14 @@ if(verbose) { cat("fitting model...\n")}
   }
 }
 #model selection: not for end user
-farm.select.temp<- function( X.res,Y.res,loss, max.iter, nfolds ,factors = NULL)
+farm.select.temp<- function( X.res,Y.res,loss, max.iter, nfolds ,eps,factors = NULL)
 {
 
   N = length(Y.res)
   P = NCOL(X.res)
   if(is.null(factors)){
     if (loss == "mcp"){
-      CV_SCAD=cv.ncvreg(X.res, Y.res,penalty="MCP",seed = 100, nfolds = nfolds, max.iter  = max.iter)
+      CV_SCAD=cv.ncvreg(X.res, Y.res,penalty="MCP",seed = 100, nfolds = nfolds, max.iter  = max.iter, eps=eps)
       beta_SCAD=coef(CV_SCAD, s = "lambda.min", exact=TRUE)
       inds_SCAD=which(beta_SCAD!=0)
       if( length(inds_SCAD)==1){
@@ -274,7 +291,7 @@ farm.select.temp<- function( X.res,Y.res,loss, max.iter, nfolds ,factors = NULL)
       }
     }
     else if (loss == "lasso"){
-      CV_lasso=cv.ncvreg(X.res, Y.res,penalty="lasso", seed = 100,nfolds = nfolds, max.iter  = max.iter)
+      CV_lasso=cv.ncvreg(X.res, Y.res,penalty="lasso", seed = 100,nfolds = nfolds, max.iter  = max.iter,eps=eps)
       beta_lasso=coef(CV_lasso, s = "lambda.min", exact=TRUE)
       inds_lasso=which(beta_lasso!=0)
       if( length(inds_lasso)==1){
@@ -286,7 +303,7 @@ farm.select.temp<- function( X.res,Y.res,loss, max.iter, nfolds ,factors = NULL)
         list(beta_chosen= inds_lasso, coef_chosen=coef_chosen,model_size=length(inds_lasso))
       }
     }else{
-      CV_MCP=cv.ncvreg(X.res, Y.res,penalty="SCAD",seed=100,nfolds = nfolds, max.iter  = max.iter)
+      CV_MCP=cv.ncvreg(X.res, Y.res,penalty="SCAD",seed=100,nfolds = nfolds, max.iter  = max.iter,eps=eps)
       beta_MCP=coef(CV_MCP, s = "lambda.min", exact=TRUE)
       inds_MCP=which(beta_MCP!=0)
       if( length(inds_MCP)==1){
@@ -301,8 +318,8 @@ farm.select.temp<- function( X.res,Y.res,loss, max.iter, nfolds ,factors = NULL)
   }else{
     Kfactors = NCOL(factors)
     if (loss == "mcp"){
-      CV_MCP=try(cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="MCP",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter,penalty.factor = c(rep(0,Kfactors), rep(1, P))), silent=TRUE)
-      if("try-error" %in% class(t)){CV_MCP=try(cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="MCP",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter))}
+      CV_MCP=try(cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="MCP",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter,eps=eps,penalty.factor = c(rep(0,Kfactors), rep(1, P))), silent=TRUE)
+      if("try-error" %in% class(t)){CV_MCP=try(cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="MCP",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter,eps=eps))}
       beta_MCP=coef(CV_MCP, s = "lambda.min", exact=TRUE)
       beta_MCP = beta_MCP[-c(2:(Kfactors+1))]
       inds_MCP=which(beta_MCP!=0)
@@ -316,8 +333,8 @@ farm.select.temp<- function( X.res,Y.res,loss, max.iter, nfolds ,factors = NULL)
       }
     }
     else if (loss == "lasso"){
-      CV_lasso=try(cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="lasso",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter,penalty.factor = c(rep(0,Kfactors), rep(1, P))), silent=TRUE)
-      if (inherits(CV_lasso, "try-error")){CV_lasso=try(cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="lasso",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter))}
+      CV_lasso=try(cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="lasso",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter,eps=eps,penalty.factor = c(rep(0,Kfactors), rep(1, P))), silent=TRUE)
+      if (inherits(CV_lasso, "try-error")){CV_lasso=try(cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="lasso",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter,eps=eps))}
       beta_lasso=coef(CV_lasso, s = "lambda.min", exact=TRUE)
       beta_lasso = beta_lasso[-c(2:(Kfactors+1))]
       inds_lasso=which(beta_lasso!=0)
@@ -330,8 +347,8 @@ farm.select.temp<- function( X.res,Y.res,loss, max.iter, nfolds ,factors = NULL)
         list(beta_chosen= inds_lasso, coef_chosen=coef_chosen,model_size=length(inds_lasso) )
       }
     }else {
-      CV_SCAD=try(cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="SCAD",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter,penalty.factor = c(rep(0,Kfactors), rep(1, P))), silent=TRUE)
-      if("try-error" %in% class(t)){CV_SCAD=try(cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="SCAD",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter))}
+      CV_SCAD=try(cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="SCAD",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter,eps=eps,penalty.factor = c(rep(0,Kfactors), rep(1, P))), silent=TRUE)
+      if("try-error" %in% class(t)){CV_SCAD=try(cv.ncvreg(X = cbind(factors,X.res), y = Y.res,penalty="SCAD",seed=100,nfolds = nfolds, family = "binomial", max.iter  = max.iter,eps=eps))}
       beta_SCAD=coef(CV_SCAD, s = "lambda.min", exact=TRUE)
       beta_SCAD = beta_SCAD[-c(2:(Kfactors+1))]
       inds_SCAD=which(beta_SCAD!=0)
@@ -357,7 +374,7 @@ farm.select.temp<- function( X.res,Y.res,loss, max.iter, nfolds ,factors = NULL)
 #' @param K.factors a \emph{optional} number of factors to be estimated. Otherwise estimated internally. K>0.
 #' @param robust a boolean, specifying whether or not to use robust estimators for mean and variance. Default is TRUE.
 #' @param cv a boolean, specifying whether or  not to run cross-validation for the tuning parameter. Default is FALSE. Only used if \code{robust} is TRUE.
-#' @param tau multiplier for the tuning parameter for Huber loss function. Default is 2. Only used if \code{robust} is TRUE and \code{cv} is FALSE. See details.
+#' @param tau \code{>0} multiplier for the tuning parameter for Huber loss function. Default is 2. Only used if \code{robust} is TRUE and \code{cv} is FALSE. See details.
 #' @param verbose a boolean specifying whether to print runtime updates to the console. Default is TRUE.
 #' @return A list with the following items
 #' \item{residual}{the data after being adjusted for underlying factors}
@@ -367,7 +384,7 @@ farm.select.temp<- function( X.res,Y.res,loss, max.iter, nfolds ,factors = NULL)
 #' @details For details about the method, see Fan et al.(2017).
 #' @details Using \code{robust.cov = TRUE} uses the Huber's loss to estimate the covariance matrix. For details of covariance estimation method see Fan et al.(2017).
 #' @details Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
-#' @details Number of latent factors, if not provided, is estimated by the eignevalue ratio test. See Ahn and Horenstein(2013).
+#' @details Number of latent factors, if not provided, is estimated by the eignevalue ratio test. See Ahn and Horenstein(2013). The maximum number is taken to be min(n,p)/2. User can supply a larger number is desired.
 #' @details The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate} is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the data.
 #' @seealso \code{\link{farm.select}}
 #' @examples
@@ -375,6 +392,7 @@ farm.select.temp<- function( X.res,Y.res,loss, max.iter, nfolds ,factors = NULL)
 #' P = 200 #dimension
 #' N = 50 #samples
 #' K = 3 #nfactors
+#' Q = 3 #model size
 #' Lambda = matrix(rnorm(P*K, 0,1), P,K)
 #' F = matrix(rnorm(N*K, 0,1), N,K)
 #' U = matrix(rnorm(P*N, 0,1), P,N)

@@ -7,7 +7,7 @@ Depends: R (>= 3.3.0)
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-Imports: graphics, stats, grDevices, utils, methods, Rcpp, glmnet,
+Imports: graphics, stats, grDevices, utils, methods, Rcpp, 
         ncvreg, fBasics
 URL: https://kbose28.github.io/FarmSelect/
 RoxygenNote: 6.0.1

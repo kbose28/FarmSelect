@@ -16,7 +16,7 @@ farm.res(X, K.factors = NULL, robust = TRUE, cv = FALSE, tau = 2,
 
 \item{cv}{a boolean, specifying whether or  not to run cross-validation for the tuning parameter. Default is FALSE. Only used if \code{robust} is TRUE.}
 
-\item{tau}{multiplier for the tuning parameter for Huber loss function. Default is 2. Only used if \code{robust} is TRUE and \code{cv} is FALSE. See details.}
+\item{tau}{\code{>0} multiplier for the tuning parameter for Huber loss function. Default is 2. Only used if \code{robust} is TRUE and \code{cv} is FALSE. See details.}
 
 \item{verbose}{a boolean specifying whether to print runtime updates to the console. Default is TRUE.}
 }
@@ -37,7 +37,7 @@ Using \code{robust.cov = TRUE} uses the Huber's loss to estimate the covariance 
 
 Number of rows and columns of the data matrix must be at least 4 in order to be able to calculate latent factors.
 
-Number of latent factors, if not provided, is estimated by the eignevalue ratio test. See Ahn and Horenstein(2013).
+Number of latent factors, if not provided, is estimated by the eignevalue ratio test. See Ahn and Horenstein(2013). The maximum number is taken to be min(n,p)/2. User can supply a larger number is desired.
 
 The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate} is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the data.
 }
@@ -46,6 +46,7 @@ set.seed(100)
 P = 200 #dimension
 N = 50 #samples
 K = 3 #nfactors
+Q = 3 #model size
 Lambda = matrix(rnorm(P*K, 0,1), P,K)
 F = matrix(rnorm(N*K, 0,1), N,K)
 U = matrix(rnorm(P*N, 0,1), P,N)

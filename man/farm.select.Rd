@@ -6,7 +6,8 @@
 \usage{
 farm.select(X, Y, loss = c("scad", "mcp", "lasso"), robust = TRUE,
   cv = FALSE, tau = 2, lin.reg = TRUE, K.factors = NULL,
-  max.iter = 10000, nfolds = ceiling(length(Y)/3), verbose = TRUE)
+  max.iter = 10000, nfolds = ceiling(length(Y)/3), eps = 1e-04,
+  verbose = TRUE)
 }
 \arguments{
 \item{X}{an n x p covariate matrix with each row being a sample. Must have same number of rows as the size of \code{Y}.}
@@ -29,6 +30,8 @@ farm.select(X, Y, loss = c("scad", "mcp", "lasso"), robust = TRUE,
 
 \item{nfolds}{the number of cross-validation folds. Default is ceiling(samplesize/3).}
 
+\item{eps}{Convergence threshhold for model fitting using \code{\link{ncvreg}}. The algorithm iterates until the RMSD for the change in linear predictors for any coefficient is less than eps. Default is \code{1e-4}.}
+
 \item{verbose}{a boolean specifying whether to print runtime updates to the console. Default is TRUE.}
 }
 \value{
@@ -45,8 +48,6 @@ Given a covariate matrix and output vector, this function first adjusts the cova
 \details{
 Number of rows and columns of the covariate matrix must be at least 4 in order to be able to calculate latent factors.
 
-For details about the method, see Fan et al.(2017).
-
 For formula of how the covariates are  adjusted for latent factors, see Section 3.2 in Fan et al.(2017).
 
 The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal rate } is the optimal rate for the tuning parameter. For details, see Fan et al.(2017). Sigma is the standard deviation of the data.
@@ -54,19 +55,20 @@ The tuning parameter \code{= tau *  sigma * optimal rate } where \code{optimal r
 \code{\link{ncvreg}} is used to fit the model after decorrelation. This package may output its own warnings about failures to converge and model saturation.
 }
 \examples{
-set.seed(10)
+##linear regression
+set.seed(100)
 P = 200 #dimension
 N = 50 #samples
 K = 3 #nfactors
-Q = 5 #model size
+Q = 3 #model size
 Lambda = matrix(rnorm(P*K, 0,1), P,K)
 F = matrix(rnorm(N*K, 0,1), N,K)
 U = matrix(rnorm(P*N, 0,1), P,N)
 X = Lambda\%*\%t(F)+U
 X = t(X)
-beta_1 = rep(3,Q)
+beta_1 = rep(5,Q)
 beta = c(beta_1, rep(0,P-Q))
-eps = rnorm(N)
+eps = rt(N, 2.5)
 Y = X\%*\%beta+eps
 
 ##with default options
@@ -82,10 +84,28 @@ output = farm.select(X,Y, tau = 3) #robust, no cross-validation, specified tau
 ##changing the loss function and inputting factors
 output = farm.select(X, Y,loss = "mcp", K.factors = 4)
 
-##use a logistic regression model
+##use a logistic regression model, a larger sample size is desired.
+\dontrun{
+set.seed(100)
+P = 400 #dimension
+N = 300 #samples
+K = 3 #nfactors
+Q = 3 #model size
+Lambda = matrix(rnorm(P*K, 0,1), P,K)
+F = matrix(rnorm(N*K, 0,1), N,K)
+U = matrix(rnorm(P*N, 0,1), P,N)
+X = Lambda\%*\%t(F)+U
+X = t(X)
+beta_1 = rep(5, Q)
+beta = c(beta_1, rep(0,P-Q))
+eps = rnorm(N)
 Prob = 1/(1+exp(-X\%*\%beta))
 Y = rbinom(N, 1, Prob)
-output = farm.select(X, Y,lin.reg=FALSE, loss = "lasso")
+
+output = farm.select(X,Y, lin.reg=FALSE, eps=1e-3, verbose=FALSE)
+output$beta.chosen
+output$coef.chosen
+}
 }
 \references{
 Fan J., Ke Y., Wang K., "Decorrelation of Covariates for High Dimensional Sparse Regression." \url{https://arxiv.org/abs/1612.08490}

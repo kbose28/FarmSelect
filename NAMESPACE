@@ -3,7 +3,6 @@
 S3method(print,farm.select)
 export(farm.res)
 export(farm.select)
-import(glmnet)
 import(grDevices)
 import(methods)
 import(ncvreg)

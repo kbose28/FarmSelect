@@ -81,7 +81,7 @@ Also see the [`farm.scree`](https://www.rdocumentation.org/packages/FarmTest/ver
 
 ## Main function example: model selection
 
-Here we generate data from a factor model with 3 factors. We have 50 samples of 200 dimensional data. The model is of size 5, where the first 5 covariate coefficients are non-zero and the rest zero. The factors, loadings, errors are all generated from a normal distribution.
+Here we generate 50 samples of 200 dimensional data from a factor model with 3 factors. The model is of size 3, where the first 3 covariate coefficients are 5 and the rest zero. The factors and loadings are generated from a normal distribution. The errors are geenrated from a $t$ distribution with $2.5$ degrees of freedom. 
 
 ```{r}
 library(FarmSelect)
@@ -89,15 +89,14 @@ set.seed(100)
 P = 200 #dimension
 N = 50 #samples
 K = 3 #nfactors
-Q = 5 #model size
+Q = 3 #model size
 Lambda = matrix(rnorm(P*K, 0,1), P,K)
 F = matrix(rnorm(N*K, 0,1), N,K)
 U = matrix(rnorm(P*N, 0,1), P,N)
 X = Lambda%*%t(F)+U
 X = t(X)
-beta_1 = rep(5,Q)
+beta_1 = rep(5, Q)
 beta = c(beta_1, rep(0,P-Q))
-eps = rnorm(N)
 eps = rt(N, 2.5)
 
 Y = X%*%beta+eps 
@@ -113,34 +112,47 @@ The values X.residual is the residual covariate matrix after adjusting for facto
 
 Now we use a different loss function for the model selection step, along with changing the number of factors.
 ```{r}
-farm.select(X,Y, loss = "mcp", K.factors = 10)
+farm.select(X,Y, loss = "mcp", K.factors = 10, verbose=FALSE)
 ```
-The robustness is controlled by the parameter of the Huber loss function. This can be chosen by cross-validation which takes a long time, but gives good results. Altenratively, we supply our own parameter $C*sd*rate$ where $C$ is a constant, rate is the optimal rate for the tuning parameter. See Fan et al.(2017) <https://arxiv.org/abs/1612.08490>. $sd$ is the standard deviation of the residuals after running the OLS version of the Huber's estimator for the parameter to be estimated.   
+The robustness is controlled by the parameter of the Huber loss function. This can be chosen by cross-validation which takes a long time, but gives good results. Altenratively, we use the parameter $tau*sd*rate$ where tau is a constant, rate is the optimal rate for the tuning parameter (see Fan et al.(2017) <https://arxiv.org/abs/1612.08490>). sd is the standard deviation of the data at hand. The value of $tau$ can be supplied by the user and takes a default value of 2.
 
 ```{r}
-#examples of other robustification options
-output = farm.select(X,Y,robust = FALSE) #non-robust
-output = farm.select(X,Y, tau = 3) #robust, no cross-validation, specified tau
-output = farm.select(X,Y, cv = TRUE) #robust, cross-validation, LONG RUNNING!!
-```
-For a logistic regression, we do the following: 
-```{r}
-set.seed(100)
-Prob = 1/(1+exp(-X%*%beta))
-Y = rbinom(N, 1, Prob)
-output = farm.select(X,Y, lin.reg=FALSE, loss = "lasso")
+##examples of other robustification options
+output = farm.select(X,Y,robust = FALSE, verbose=FALSE) #non-robust
+output = farm.select(X,Y, tau = 3, verbose=FALSE) #robust, no cross-validation, specified tau
+#output = farm.select(X,Y, cv = TRUE) #robust, cross-validation, LONG RUNNING!!
 ```
 The function ``farm.res`` adjusts the dataset for latent factors. The number of factors is estimated internally by using the method in [@ah2013].
 ```{r}
-output = farm.res(X)
+output = farm.res(X, verbose=FALSE)
 names(output)
 ```
 If known, we can provide this function (or the main function) the number of latent factors. Providing too large a number results in a warning message. The maximum number of factors possible is $\max(n,p)$ but a much smaller number is recommended. 
 ```{r}
-output = farm.res(X, K.factors  = 30)
+output = farm.res(X, K.factors  = 30, verbose=FALSE)
 ```
 We see a warning telling us that it is not a good idea to calculate 30 eigenvalues from a dataset that has only 50 samples. 
 
+For a logistic regression, we prefer a larger sample size: Here we generate 200 samples of 300 dimensional data from a factor model with 3 factors. The model is of size 3, where the first 3 covariate coefficients are 5 and the rest zero. The factors, loadings, errors are all generated from a normal distribution.
+```{r}
+set.seed(100)
+P = 400 #dimension
+N = 300 #samples
+K = 3 #nfactors
+Q = 3 #model size
+Lambda = matrix(rnorm(P*K, 0,1), P,K)
+F = matrix(rnorm(N*K, 0,1), N,K)
+U = matrix(rnorm(P*N, 0,1), P,N)
+X = Lambda%*%t(F)+U
+X = t(X)
+beta_1 = rep(5, Q)
+beta = c(beta_1, rep(0,P-Q))
+eps = rnorm(N)
+
+Prob = 1/(1+exp(-X%*%beta))
+Y = rbinom(N, 1, Prob)
+output = farm.select(X,Y, lin.reg=FALSE, eps=1e-3, verbose=FALSE)
+```
 
 ## Notes 
 

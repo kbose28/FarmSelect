@@ -12,7 +12,7 @@
 
 <meta name="author" content="Koushiki Bose" />
 
-<meta name="date" content="2018-04-16" />
+<meta name="date" content="2018-04-19" />
 
 <title>FarmSelect: Factor Adjusted Robust Model Selection</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">FarmSelect: Factor Adjusted Robust Model Selection</h1>
 <h4 class="author"><em>Koushiki Bose</em></h4>
-<h4 class="date"><em>2018-04-16</em></h4>
+<h4 class="date"><em>2018-04-19</em></h4>
 
 
 
@@ -115,26 +115,28 @@ devtools<span class="op">::</span><span class="kw">install_github</span>(<span c
 </div>
 <div id="main-function-example-model-selection" class="section level2">
 <h2>Main function example: model selection</h2>
-<p>Here we generate data from a factor model with 3 factors. We have 50 samples of 200 dimensional data. The model is of size 5, where the first 5 covariate coefficients are non-zero and the rest zero. The factors, loadings, errors are all generated from a normal distribution.</p>
+<p>Here we generate 50 samples of 200 dimensional data from a factor model with 3 factors. The model is of size 3, where the first 3 covariate coefficients are 5 and the rest zero. The factors and loadings are generated from a normal distribution. The errors are geenrated from a <span class="math inline">\(t\)</span> distribution with <span class="math inline">\(2.5\)</span> degrees of freedom.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(FarmSelect)
-<span class="kw">set.seed</span>(<span class="dv">10</span>)
+<span class="kw">set.seed</span>(<span class="dv">100</span>)
 P =<span class="st"> </span><span class="dv">200</span> <span class="co">#dimension</span>
 N =<span class="st"> </span><span class="dv">50</span> <span class="co">#samples</span>
 K =<span class="st"> </span><span class="dv">3</span> <span class="co">#nfactors</span>
-Q =<span class="st"> </span><span class="dv">5</span> <span class="co">#model size</span>
+Q =<span class="st"> </span><span class="dv">3</span> <span class="co">#model size</span>
 Lambda =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(P<span class="op">*</span>K, <span class="dv">0</span>,<span class="dv">1</span>), P,K)
 F =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(N<span class="op">*</span>K, <span class="dv">0</span>,<span class="dv">1</span>), N,K)
 U =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(P<span class="op">*</span>N, <span class="dv">0</span>,<span class="dv">1</span>), P,N)
 X =<span class="st"> </span>Lambda<span class="op">%*%</span><span class="kw">t</span>(F)<span class="op">+</span>U
 X =<span class="st"> </span><span class="kw">t</span>(X)
-beta_<span class="dv">1</span> =<span class="st"> </span><span class="dv">3</span><span class="op">+</span><span class="dv">3</span><span class="op">*</span><span class="kw">runif</span>(Q)
+beta_<span class="dv">1</span> =<span class="st"> </span><span class="kw">rep</span>(<span class="dv">5</span>, Q)
 beta =<span class="st"> </span><span class="kw">c</span>(beta_<span class="dv">1</span>, <span class="kw">rep</span>(<span class="dv">0</span>,P<span class="op">-</span>Q))
-eps =<span class="st"> </span><span class="kw">rnorm</span>(N)
 eps =<span class="st"> </span><span class="kw">rt</span>(N, <span class="fl">2.5</span>)
 
 Y =<span class="st"> </span>X<span class="op">%*%</span>beta<span class="op">+</span>eps 
-output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y) <span class="co">#robust, no cross-validation</span>
-output</code></pre></div>
+output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y) <span class="co">#robust, no cross-validation</span></code></pre></div>
+<pre><code>## calculating tuning parameters...
+## calculating covariance matrix...
+## fitting model...</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output</code></pre></div>
 <pre><code>## 
 ##  Factor Adjusted Robust Model Selection 
 ## loss function used: scad
@@ -142,17 +144,17 @@ output</code></pre></div>
 ## p = 200, n = 50
 ## factors found: 3
 ## size of model selected:
-##  5</code></pre>
+##  3</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(output)</code></pre></div>
 <pre><code>## [1] &quot;model.size&quot;  &quot;beta.chosen&quot; &quot;coef.chosen&quot; &quot;nfactors&quot;    &quot;X.residual&quot; 
 ## [6] &quot;p&quot;           &quot;n&quot;           &quot;robust&quot;      &quot;loss&quot;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output<span class="op">$</span>beta.chosen</code></pre></div>
-<pre><code>## [1] 1 2 3 4 5</code></pre>
+<pre><code>## [1] 1 2 3</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output<span class="op">$</span>coef.chosen</code></pre></div>
-<pre><code>## [1] 4.077831 5.377618 3.308705 5.640873 4.803170</code></pre>
+<pre><code>## [1] 5.155005 5.085859 5.088709</code></pre>
 <p>The values X.residual is the residual covariate matrix after adjusting for factors.</p>
 <p>Now we use a different loss function for the model selection step, along with changing the number of factors.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">farm.select</span>(X,Y, <span class="dt">loss =</span> <span class="st">&quot;mcp&quot;</span>, <span class="dt">K.factors =</span> <span class="dv">10</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">farm.select</span>(X,Y, <span class="dt">loss =</span> <span class="st">&quot;mcp&quot;</span>, <span class="dt">K.factors =</span> <span class="dv">10</span>, <span class="dt">verbose=</span><span class="ot">FALSE</span>)</code></pre></div>
 <pre><code>## 
 ##  Factor Adjusted Robust Model Selection 
 ## loss function used: mcp
@@ -160,26 +162,39 @@ output</code></pre></div>
 ## p = 200, n = 50
 ## factors found: 10
 ## size of model selected:
-##  7</code></pre>
-<p>The robustness is controlled by the parameter of the Huber loss function. This can be chosen by cross-validation which takes a long time, but gives good results. Altenratively, we supply our own parameter <span class="math inline">\(C*sd*rate\)</span> where <span class="math inline">\(C\)</span> is a constant, rate is the optimal rate for the tuning parameter. See Fan et al.(2017) <a href="https://arxiv.org/abs/1612.08490" class="uri">https://arxiv.org/abs/1612.08490</a>. <span class="math inline">\(sd\)</span> is the standard deviation of the residuals after running the OLS version of the Huber’s estimator for the parameter to be estimated.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#examples of other robustification options</span>
-output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y,<span class="dt">robust =</span> <span class="ot">FALSE</span>) <span class="co">#non-robust</span>
-output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y, <span class="dt">tau =</span> <span class="dv">3</span>) <span class="co">#robust, no cross-validation, specified tau</span>
+##  10</code></pre>
+<p>The robustness is controlled by the parameter of the Huber loss function. This can be chosen by cross-validation which takes a long time, but gives good results. Altenratively, we use the parameter <span class="math inline">\(tau*sd*rate\)</span> where tau is a constant, rate is the optimal rate for the tuning parameter (see Fan et al.(2017) <a href="https://arxiv.org/abs/1612.08490" class="uri">https://arxiv.org/abs/1612.08490</a>). sd is the standard deviation of the data at hand. The value of <span class="math inline">\(tau\)</span> can be supplied by the user and takes a default value of 2.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">##examples of other robustification options
+output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y,<span class="dt">robust =</span> <span class="ot">FALSE</span>, <span class="dt">verbose=</span><span class="ot">FALSE</span>) <span class="co">#non-robust</span>
+output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y, <span class="dt">tau =</span> <span class="dv">3</span>, <span class="dt">verbose=</span><span class="ot">FALSE</span>) <span class="co">#robust, no cross-validation, specified tau</span>
 <span class="co">#output = farm.select(X,Y, cv = TRUE) #robust, cross-validation, LONG RUNNING!!</span></code></pre></div>
-<p>For a logistic regression, we do the following:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">100</span>)
-Prob =<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(<span class="op">-</span>X<span class="op">%*%</span>beta))
-Y =<span class="st"> </span><span class="kw">rbinom</span>(N, <span class="dv">1</span>, Prob)
-output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y, <span class="dt">lin.reg=</span><span class="ot">FALSE</span>, <span class="dt">loss =</span> <span class="st">&quot;lasso&quot;</span>)</code></pre></div>
 <p>The function <code>farm.res</code> adjusts the dataset for latent factors. The number of factors is estimated internally by using the method in <span class="citation">(Ahn and Horenstein 2013)</span>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.res</span>(X)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.res</span>(X, <span class="dt">verbose=</span><span class="ot">FALSE</span>)
 <span class="kw">names</span>(output)</code></pre></div>
 <pre><code>## [1] &quot;X.res&quot;    &quot;nfactors&quot; &quot;factors&quot;  &quot;loadings&quot;</code></pre>
 <p>If known, we can provide this function (or the main function) the number of latent factors. Providing too large a number results in a warning message. The maximum number of factors possible is <span class="math inline">\(\max(n,p)\)</span> but a much smaller number is recommended.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.res</span>(X, <span class="dt">K.factors  =</span> <span class="dv">30</span>)</code></pre></div>
-<pre><code>## Warning in farm.res(X, K.factors = 30): 
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">output =<span class="st"> </span><span class="kw">farm.res</span>(X, <span class="dt">K.factors  =</span> <span class="dv">30</span>, <span class="dt">verbose=</span><span class="ot">FALSE</span>)</code></pre></div>
+<pre><code>## Warning in farm.res(X, K.factors = 30, verbose = FALSE): 
 ##  Warning: Number of factors supplied is &gt; min(n,p)/2. May cause numerical inconsistencies</code></pre>
 <p>We see a warning telling us that it is not a good idea to calculate 30 eigenvalues from a dataset that has only 50 samples.</p>
+<p>For a logistic regression, we prefer a larger sample size: Here we generate 200 samples of 300 dimensional data from a factor model with 3 factors. The model is of size 3, where the first 3 covariate coefficients are 5 and the rest zero. The factors, loadings, errors are all generated from a normal distribution.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">100</span>)
+P =<span class="st"> </span><span class="dv">400</span> <span class="co">#dimension</span>
+N =<span class="st"> </span><span class="dv">300</span> <span class="co">#samples</span>
+K =<span class="st"> </span><span class="dv">3</span> <span class="co">#nfactors</span>
+Q =<span class="st"> </span><span class="dv">3</span> <span class="co">#model size</span>
+Lambda =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(P<span class="op">*</span>K, <span class="dv">0</span>,<span class="dv">1</span>), P,K)
+F =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(N<span class="op">*</span>K, <span class="dv">0</span>,<span class="dv">1</span>), N,K)
+U =<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">rnorm</span>(P<span class="op">*</span>N, <span class="dv">0</span>,<span class="dv">1</span>), P,N)
+X =<span class="st"> </span>Lambda<span class="op">%*%</span><span class="kw">t</span>(F)<span class="op">+</span>U
+X =<span class="st"> </span><span class="kw">t</span>(X)
+beta_<span class="dv">1</span> =<span class="st"> </span><span class="kw">rep</span>(<span class="dv">5</span>, Q)
+beta =<span class="st"> </span><span class="kw">c</span>(beta_<span class="dv">1</span>, <span class="kw">rep</span>(<span class="dv">0</span>,P<span class="op">-</span>Q))
+eps =<span class="st"> </span><span class="kw">rnorm</span>(N)
+
+Prob =<span class="st"> </span><span class="dv">1</span><span class="op">/</span>(<span class="dv">1</span><span class="op">+</span><span class="kw">exp</span>(<span class="op">-</span>X<span class="op">%*%</span>beta))
+Y =<span class="st"> </span><span class="kw">rbinom</span>(N, <span class="dv">1</span>, Prob)
+output =<span class="st"> </span><span class="kw">farm.select</span>(X,Y, <span class="dt">lin.reg=</span><span class="ot">FALSE</span>, <span class="dt">eps=</span><span class="fl">1e-3</span>, <span class="dt">verbose=</span><span class="ot">FALSE</span>)</code></pre></div>
 </div>
 <div id="notes" class="section level2">
 <h2>Notes</h2>
