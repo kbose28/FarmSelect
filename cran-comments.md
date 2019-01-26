@@ -11,7 +11,12 @@ Test environments
 R CMD check results
 -------------------
 
--There were NO ERRORs, WARNINGs or NOTEs.
+-There were NO ERRORs or WARNINGs.
+
+-   1 NOTE Possibly mis-spelled words in DESCRIPTION: Gaussianity
+    (5:626) al (5:688) arXiv (5:699) et (5:685)
+
+These are spelled correctly.
 
 Downstream dependencies
 -----------------------

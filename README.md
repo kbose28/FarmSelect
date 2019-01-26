@@ -114,7 +114,7 @@ farm.select(X,Y, loss = "mcp", K.factors = 10, verbose=FALSE)
 #>  10
 ```
 
-The robustness is controlled by the parameter of the Huber loss function. This can be chosen by cross-validation which takes a long time, but gives good results. Altenratively, we use the parameter *t**a**u* \* *s**d* \* *r**a**t**e* where tau is a constant, rate is the optimal rate for the tuning parameter (see Fan et al.(2017) <https://arxiv.org/abs/1612.08490>). sd is the standard deviation of the data at hand. The value of *t**a**u* can be supplied by the user and takes a default value of 2.
+The robustness is controlled by the parameter of the Huber loss function. This can be chosen by cross-validation which takes a long time, but gives good results. Alternatively, we use the parameter *t**a**u* \* *s**d* \* *r**a**t**e* where tau is a constant, rate is the optimal rate for the tuning parameter (see Fan et al.(2017) <https://arxiv.org/abs/1612.08490>). sd is the standard deviation of the data at hand. The value of *t**a**u* can be supplied by the user and takes a default value of 2.
 
 ``` r
 ##examples of other robustification options
